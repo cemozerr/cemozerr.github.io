@@ -1,98 +1,221 @@
-<!DOCTYPE HTML>
-<!--
-	Identity by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
-	<head>
-		<title>Cem Ozer</title>
-		<meta charset="utf-8" />
-		<link rel="icon" href="images/favicon.ico">
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<!--[if lte IE 8]><script src="assets/js/html5shiv.js"></script><![endif]-->
-		<link rel="stylesheet" href="assets/css/main.css" />
-		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
-		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
-		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
-	</head>
-	<body class="is-loading">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cem Özer — Chief Strategy Officer, Celestia Labs</title>
+<meta name="description" content="Cem Özer is Chief Strategy Officer at Celestia Labs and co-founder of Sovereign Labs, acquired by Celestia Labs in 2026. Previously an Ethereum core developer on Teku at ConsenSys.">
+<link rel="canonical" href="https://cemozer.co/">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Cem Özer">
+<meta property="og:description" content="Co-founder of Sovereign Labs, acquired by Celestia Labs. Chief Strategy Officer at Celestia Labs.">
+<meta property="og:url" content="https://cemozer.co/">
+<meta property="og:image" content="https://cemozer.co/portrait.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:creator" content="@cemozer_">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #fcfbf8;
+    --ink: #171611;
+    --muted: #6d675c;
+    --rule: #e5dfd4;
+    --accent: #2c5545;
+    --accent-soft: #eef2ee;
+    --measure: 41rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121110;
+      --ink: #ece7dc;
+      --muted: #a29a8b;
+      --rule: #2b2822;
+      --accent: #8dc0ad;
+      --accent-soft: #1b2420;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    font-size: 18px;
+    line-height: 1.66;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--measure); margin: 0 auto; padding: 3.2rem 1.4rem 4rem; }
+  a { color: inherit; text-decoration-color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
 
-		<!-- Wrapper -->
-			<div id="wrapper">
+  .hero { display: flex; gap: 1.35rem; align-items: center; padding-bottom: 1.9rem; border-bottom: 1px solid var(--rule); }
+  .portrait {
+    width: 104px; height: 104px; border-radius: 14px;
+    object-fit: cover; flex: 0 0 auto;
+    box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 6px 20px rgba(0,0,0,.06);
+  }
+  h1 {
+    font-size: clamp(1.9rem, 5.5vw, 2.45rem);
+    line-height: 1.1; letter-spacing: -0.02em;
+    margin: 0 0 .45rem; font-weight: 600;
+  }
+  .role { margin: 0; color: var(--muted); font-size: 1.02rem; line-height: 1.5; }
+  .role em { color: var(--ink); font-style: normal; }
 
-				<!-- Main -->
-					<section id="main">
-						<header>
-							<span class="avatar"><img src="images/avatar.jpg" alt="" /></span>
-							<h1>Cem Ozer</h1>
-							<p>Software Developer</p>
-						</header>
-						<!--
-						<hr />
-						<h2>Extra Stuff!</h2>
-						<form method="post" action="#">
-							<div class="field">
-								<input type="text" name="name" id="name" placeholder="Name" />
-							</div>
-							<div class="field">
-								<input type="email" name="email" id="email" placeholder="Email" />
-							</div>
-							<div class="field">
-								<div class="select-wrapper">
-									<select name="department" id="department">
-										<option value="">Department</option>
-										<option value="sales">Sales</option>
-										<option value="tech">Tech Support</option>
-										<option value="null">/dev/null</option>
-									</select>
-								</div>
-							</div>
-							<div class="field">
-								<textarea name="message" id="message" placeholder="Message" rows="4"></textarea>
-							</div>
-							<div class="field">
-								<input type="checkbox" id="human" name="human" /><label for="human">I'm a human</label>
-							</div>
-							<div class="field">
-								<label>But are you a robot?</label>
-								<input type="radio" id="robot_yes" name="robot" /><label for="robot_yes">Yes</label>
-								<input type="radio" id="robot_no" name="robot" /><label for="robot_no">No</label>
-							</div>
-							<ul class="actions">
-								<li><a href="#" class="button">Get Started</a></li>
-							</ul>
-						</form>
-						<hr />
-						-->
-						<footer>
-							<ul class="icons">
-								<li><a href="https://github.com/cemozerr" class="fa-github">GitHubr</a></li>
-								<li><a href="https://www.linkedin.com/in/cemozer" class="fa-linkedin">LinkedIn</a></li>
-								<li><a href="https://www.instagram.com/cem0zer/" class="fa-instagram">Instagram</a></li>
-								<li><a href="https://www.facebook.com/cozercem" class="fa-facebook">Facebook</a></li>
-								<li><a href="https://www.dropbox.com/s/poo0c5ncv3un2bb/Resume.pdf?dl=0" class="fa-resume">Resume</a></li>
-							</ul>
-						</footer>
-					</section>
+  section { padding-top: 2.3rem; }
+  .label {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: .7rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 1rem;
+  }
+  p { margin: 0 0 1.05rem; }
+  p:last-child { margin-bottom: 0; }
 
-				<!-- Footer -->
-					<footer id="footer">
-						<ul class="copyright">
-							<li>&copy; Cem Ozer</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-						</ul>
-					</footer>
+  .jobs { list-style: none; margin: 0; padding: 0; }
+  .jobs li { display: grid; grid-template-columns: 7.2rem 1fr; gap: 1.1rem; padding: 1.15rem 0; border-top: 1px solid var(--rule); }
+  .jobs li:first-child { border-top: 0; padding-top: 0; }
+  .when {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: .74rem; letter-spacing: .04em; color: var(--muted);
+    padding-top: .28rem; font-variant-numeric: tabular-nums;
+  }
+  .what h3 { font-size: 1.02rem; margin: 0 0 .1rem; font-weight: 600; letter-spacing: -.005em; }
+  .what .org { color: var(--muted); font-weight: 400; }
+  .what p { margin: .3rem 0 0; font-size: .95rem; color: var(--muted); line-height: 1.55; }
+  .what p a { color: var(--muted); }
 
-			</div>
+  .press { list-style: none; margin: 0; padding: 0; font-size: .96rem; }
+  .press li { padding: .55rem 0; border-top: 1px solid var(--rule); display: flex; gap: .6rem; justify-content: space-between; align-items: baseline; }
+  .press li:first-child { border-top: 0; }
+  .press .outlet { color: var(--muted); font-size: .82rem; white-space: nowrap; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
 
-		<!-- Scripts -->
-			<!--[if lte IE 8]><script src="assets/js/respond.min.js"></script><![endif]-->
-			<script>
-				if ('addEventListener' in window) {
-					window.addEventListener('load', function() { document.body.className = document.body.className.replace(/\bis-loading\b/, ''); });
-					document.body.className += (navigator.userAgent.match(/(MSIE|rv:11\.0)/) ? ' is-ie' : '');
-				}
-			</script>
+  .contact-email {
+    display: inline-block; font-size: 1.18rem; letter-spacing: -.01em;
+    margin-bottom: 1.1rem;
+  }
+  .links { display: flex; flex-wrap: wrap; gap: .5rem 1.15rem; list-style: none; margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: .84rem; color: var(--muted); }
+  .links a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--rule); padding-bottom: 1px; }
+  .links a:hover { color: var(--accent); border-color: var(--accent); }
 
-	</body>
+  footer { margin-top: 3.4rem; padding-top: 1.2rem; border-top: 1px solid var(--rule);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: .74rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: .3rem .8rem; justify-content: space-between; }
+
+  @media (max-width: 34rem) {
+    .wrap { padding-top: 2.2rem; }
+    .hero { gap: 1rem; }
+    .portrait { width: 78px; height: 78px; border-radius: 10px; }
+    .jobs li { grid-template-columns: 1fr; gap: .2rem; }
+    .when { padding-top: 0; }
+    .press li { flex-direction: column; gap: .1rem; }
+  }
+  @media print {
+    body { background: #fff; color: #000; font-size: 11pt; }
+    .wrap { padding: 0; max-width: none; }
+    .portrait { box-shadow: none; }
+    a { text-decoration: none; }
+    section { page-break-inside: avoid; }
+  }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Cem Özer",
+  "url": "https://cemozer.co/",
+  "image": "https://cemozer.co/portrait.jpg",
+  "jobTitle": "Chief Strategy Officer",
+  "worksFor": { "@type": "Organization", "name": "Celestia Labs", "url": "https://celestia.org/" },
+  "email": "mailto:cozercem@gmail.com",
+  "address": { "@type": "PostalAddress", "addressLocality": "Brooklyn", "addressRegion": "NY", "addressCountry": "US" },
+  "sameAs": [
+    "https://github.com/cemozerr",
+    "https://x.com/cemozer_",
+    "https://www.linkedin.com/in/cemozer"
+  ]
+}
+</script>
+</head>
+<body>
+<main class="wrap">
+
+  <header class="hero">
+    <img class="portrait" src="portrait.jpg" srcset="portrait-160.jpg 160w, portrait-320.jpg 320w, portrait.jpg 460w" sizes="104px" alt="Cem Özer" width="460" height="460">
+    <div>
+      <h1>Cem Özer</h1>
+      <p class="role">Co-founder of Sovereign Labs, acquired by Celestia Labs. Chief Strategy Officer at Celestia Labs. Brooklyn, New York.</p>
+    </div>
+  </header>
+
+  <section>
+    <h2 class="label">About</h2>
+    <p>I build blockchain infrastructure. I co-founded Sovereign Labs in 2021 and was its CEO until Celestia Labs acquired the company in July 2026. I now lead strategy at Celestia Labs as Chief Strategy Officer.</p>
+    <p>Before Sovereign, I was an Ethereum core developer at ConsenSys, working on Teku, the open-source Ethereum consensus client written in Java. I also co-founded Plaintext Capital, an early-stage crypto investment firm.</p>
+  </section>
+
+  <section>
+    <h2 class="label">Selected work</h2>
+    <ul class="jobs">
+      <li>
+        <div class="when">2026 —</div>
+        <div class="what">
+          <h3>Chief Strategy Officer <span class="org">· Celestia Labs</span></h3>
+          <p>Strategy and go-to-market as Celestia expands from a modular Layer 1 into full-stack infrastructure for custom blockchains.</p>
+        </div>
+      </li>
+      <li>
+        <div class="when">2021 — 2026</div>
+        <div class="what">
+          <h3>Co-founder &amp; CEO <span class="org">· Sovereign Labs</span></h3>
+          <p>Built the Sovereign SDK, a framework for application-specific, high-performance blockchains. The SDK powers Relay, the largest bridge by volume with over $8.5B in transfers, and Bullet, a perpetuals exchange clearing orders in 1.2 ms. Acquired by Celestia Labs in 2026.</p>
+        </div>
+      </li>
+      <li>
+        <div class="when">Earlier</div>
+        <div class="what">
+          <h3>Ethereum core developer <span class="org">· ConsenSys</span></h3>
+          <p>Contributed to Teku, an open-source Ethereum consensus client, as part of Ethereum’s core development.</p>
+        </div>
+      </li>
+      <li>
+        <div class="when">Earlier</div>
+        <div class="what">
+          <h3>Co-founder <span class="org">· Plaintext Capital</span></h3>
+          <p>Early-stage crypto investment.</p>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2 class="label">Press</h2>
+    <ul class="press">
+      <li><a href="https://blog.celestia.org/celestia-labs-acquires-sovereign-labs-to-build-high-performance-custom-blockchains">Celestia Labs acquires Sovereign Labs</a><span class="outlet">Celestia Blog, 2026</span></li>
+      <li><a href="https://techcrunch.com/2023/01/30/haun-ventures-leads-sovereign-labs-7-4m-seed-round-to-help-scale-blockchains">Haun Ventures leads Sovereign Labs’ $7.4M seed round</a><span class="outlet">TechCrunch, 2023</span></li>
+      <li><a href="https://fortune.com/2023/01/30/haun-ventures-million-dollar-investment-startup-blockchain-infrastructure/">Haun Ventures backs Sovereign Labs</a><span class="outlet">Fortune, 2023</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2 class="label">Contact</h2>
+    <a class="contact-email" href="mailto:cozercem@gmail.com">cozercem@gmail.com</a>
+    <ul class="links">
+      <li><a href="https://x.com/cemozer_">X</a></li>
+      <li><a href="https://github.com/cemozerr">GitHub</a></li>
+      <li><a href="https://www.linkedin.com/in/cemozer">LinkedIn</a></li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>© 2026 Cem Özer</span>
+    <span>Brooklyn, New York</span>
+  </footer>
+
+</main>
+</body>
 </html>
