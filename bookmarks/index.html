@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Bookmarks — locked</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #16181c;
+    --muted: #5b6570;
+    --rule: #e6e8eb;
+    --card: #f7f8f9;
+    --accent: #1d6fd0;
+    --accent-fg: #ffffff;
+    --err: #c0392b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1114;
+      --fg: #e7e9ea;
+      --muted: #9aa4ae;
+      --rule: #24282d;
+      --card: #171a1e;
+      --accent: #6aa9f0;
+      --accent-fg: #06121f;
+      --err: #f0776a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  a { color: var(--accent); }
+
+  /* ---------- gate ---------- */
+  #gate {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+  }
+  .gate-box { width: 100%; max-width: 22rem; }
+  .gate-box h1 { font-size: 1.15rem; margin: 0 0 .35rem; letter-spacing: -.01em; }
+  .gate-box p { color: var(--muted); font-size: .86rem; margin: 0 0 1.4rem; }
+  label { display: block; font-size: .78rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: .4rem; }
+  input[type=password] {
+    width: 100%; padding: .7rem .8rem; font-size: 1rem; font-family: inherit;
+    color: var(--fg); background: var(--card);
+    border: 1px solid var(--rule); border-radius: 9px; outline: none;
+  }
+  input[type=password]:focus { border-color: var(--accent); }
+  button {
+    font-family: inherit; font-size: .95rem; font-weight: 600;
+    border: none; border-radius: 9px; cursor: pointer;
+    padding: .7rem 1rem; background: var(--accent); color: var(--accent-fg);
+  }
+  button.secondary { background: transparent; color: var(--muted); border: 1px solid var(--rule); font-weight: 500; }
+  button:disabled { opacity: .55; cursor: default; }
+  #go { width: 100%; margin-top: .8rem; }
+  #err { color: var(--err); font-size: .85rem; margin-top: .7rem; min-height: 1.2em; }
+
+  /* ---------- app ---------- */
+  #app { display: none; }
+  header.bar {
+    position: sticky; top: 0; z-index: 5;
+    display: flex; align-items: center; gap: .8rem;
+    padding: .75rem 1.1rem;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+  }
+  header.bar .name { font-weight: 700; font-size: .95rem; letter-spacing: -.01em; }
+  header.bar .count { color: var(--muted); font-size: .8rem; }
+  header.bar .spacer { flex: 1; }
+  header.bar button { padding: .4rem .75rem; font-size: .82rem; }
+
+  main { max-width: 46rem; margin: 0 auto; padding: 1.5rem 1.1rem 4rem; }
+  .list { display: grid; gap: .7rem; }
+  .card {
+    display: block; width: 100%; text-align: left;
+    background: var(--card); border: 1px solid var(--rule); border-radius: 12px;
+    padding: .95rem 1rem; cursor: pointer; color: inherit; font: inherit;
+    transition: border-color .12s ease;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card .kicker { font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  .card .t { font-weight: 650; margin: .25rem 0 .3rem; line-height: 1.35; }
+  .card .b { color: var(--muted); font-size: .87rem; }
+
+  /* ---------- reader ---------- */
+  #reader { display: none; }
+  #reader .bar { position: sticky; top: 0; z-index: 5; }
+  #frame { display: block; width: 100%; border: 0; background: var(--bg); height: calc(100vh - 53px); }
+  .hint { color: var(--muted); font-size: .8rem; margin-top: 2rem; }
+  .warn { color: var(--muted); font-size: .8rem; margin-top: .75rem; }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-box">
+    <h1>Bookmarks</h1>
+    <p>Encrypted with AES-256-GCM. The password never leaves this page.</p>
+    <label for="pw">Password</label>
+    <input id="pw" type="password" autocomplete="current-password" autofocus>
+    <button id="go">Unlock</button>
+    <div id="err"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="bar" id="listbar">
+    <div>
+      <div class="name">Bookmarked tweets</div>
+      <div class="count" id="count"></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="secondary" id="lock1">Lock</button>
+  </header>
+
+  <header class="bar" id="readbar" style="display:none">
+    <button class="secondary" id="back">&larr; All</button>
+    <div class="name" id="readtitle"></div>
+    <div class="spacer"></div>
+    <button class="secondary" id="lock2">Lock</button>
+  </header>
+
+  <main id="listview">
+    <div class="list" id="list"></div>
+    <div class="hint">Everything here — text, images, video — is inside the encrypted vault. Nothing is readable without the password, including from the page source.</div>
+  </main>
+
+  <div id="reader">
+    <iframe id="frame" title="Saved post"></iframe>
+  </div>
+</div>
+
+<script src="vault.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { posts: [], index: null, key: null };
+
+  if (!window.crypto || !window.crypto.subtle) {
+    document.addEventListener("DOMContentLoaded", function () {
+      var e = document.getElementById("err");
+      if (e) e.textContent = "WebCrypto unavailable. Open this over https:// or localhost (file:// works in Chrome/Safari), not plain http on a LAN address.";
+    });
+  }
+
+  function b64ToBytes(b64) {
+    var bin = atob(b64), out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  async function derive(password, salt, iterations) {
+    var km = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: salt, iterations: iterations, hash: "SHA-256" },
+      km, { name: "AES-GCM", length: 256 }, false, ["decrypt"]
+    );
+  }
+
+  async function unlock(password) {
+    var V = window.VAULT;
+    if (!V) throw new Error("vault.js not found");
+    var key = await derive(password, b64ToBytes(V.salt), V.it || 600000);
+    var plain;
+    try {
+      plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64ToBytes(V.iv) }, key, b64ToBytes(V.data));
+    } catch (e) {
+      throw new Error("wrong password");
+    }
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+
+  function render(payload) {
+    state.posts = payload.posts || [];
+    var list = $("list");
+    list.textContent = "";
+    $("count").textContent = state.posts.length + " saved";
+
+    state.posts.forEach(function (p, i) {
+      var el = document.createElement("button");
+      el.className = "card";
+      el.type = "button";
+      var kicker = document.createElement("div");
+      kicker.className = "kicker";
+      kicker.textContent = p.handle + "  ·  " + p.date;
+      var t = document.createElement("div");
+      t.className = "t";
+      t.textContent = p.title;
+      var b = document.createElement("div");
+      b.className = "b";
+      b.textContent = p.blurb || "";
+      el.appendChild(kicker); el.appendChild(t); el.appendChild(b);
+      el.addEventListener("click", function () { open(i); });
+      list.appendChild(el);
+    });
+
+    $("gate").style.display = "none";
+    $("app").style.display = "block";
+    document.title = "Bookmarks";
+  }
+
+  function open(i) {
+    var p = state.posts[i];
+    if (!p) return;
+    state.index = i;
+    $("readtitle").textContent = p.title;
+    $("listview").style.display = "none";
+    $("listbar").style.display = "none";
+    $("readbar").style.display = "flex";
+    $("reader").style.display = "block";
+    var f = $("frame");
+    f.srcdoc = p.html;
+    window.scrollTo(0, 0);
+  }
+
+  function close() {
+    state.index = null;
+    $("frame").srcdoc = "<!DOCTYPE html><title></title>";
+    $("reader").style.display = "none";
+    $("readbar").style.display = "none";
+    $("listbar").style.display = "flex";
+    $("listview").style.display = "block";
+  }
+
+  function lock() {
+    state.key = null;
+    state.posts = [];
+    $("list").textContent = "";
+    $("frame").srcdoc = "<!DOCTYPE html><title></title>";
+    $("pw").value = "";
+    $("err").textContent = "";
+    close();
+    $("app").style.display = "none";
+    $("gate").style.display = "grid";
+    document.title = "Bookmarks — locked";
+    $("pw").focus();
+  }
+
+  var busy = false;
+  async function submit() {
+    if (busy) return;
+    var pw = $("pw").value;
+    if (!pw) return;
+    busy = true;
+    $("go").disabled = true;
+    $("go").textContent = "Decrypting…";
+    $("err").textContent = "";
+    try {
+      var payload = await unlock(pw);
+      render(payload);
+    } catch (e) {
+      $("err").textContent = e.message === "wrong password"
+        ? "Wrong password."
+        : "Could not unlock: " + e.message;
+      $("pw").select();
+    } finally {
+      busy = false;
+      $("go").disabled = false;
+      $("go").textContent = "Unlock";
+    }
+  }
+
+  $("go").addEventListener("click", submit);
+  $("pw").addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
+  $("lock1").addEventListener("click", lock);
+  $("lock2").addEventListener("click", lock);
+  $("back").addEventListener("click", close);
+})();
+</script>
+</body>
+</html>
