@@ -218,6 +218,11 @@
   .media.n1 img { max-height: 510px; height: auto; object-fit: cover; cursor: zoom-in; background: var(--card); }
   .media.n2 img, .media.n3 img, .media.n4 img { height: 100%; object-fit: cover; cursor: zoom-in; }
   .media video { max-height: 510px; }
+  .media img:not([src]), .media video.loading { background: var(--card); }
+  .media img:not([src]) { min-height: 120px; animation: pulse 1.4s ease-in-out infinite; }
+  .media img.failed { animation: none; min-height: 60px; }
+  @keyframes pulse { 50% { opacity: .55; } }
+  @media (prefers-reduced-motion: reduce) { .media img:not([src]) { animation: none; } }
 
   .quote {
     margin-top: 12px; border: 1px solid var(--line-strong); border-radius: 16px; overflow: hidden;
@@ -395,14 +400,14 @@
         <h3>Saved from</h3>
         <div id="people"></div>
       </div>
-      <div class="side-foot">Everything on this page — text, images, video — is decrypted locally from one encrypted file. Locking wipes it from the page.</div>
+      <div class="side-foot">Everything on this page — text, images, video — is encrypted. Media downloads only when you scroll near it, and locking wipes everything from the page.</div>
     </div>
   </aside>
 </div>
 
 <div id="lightbox" hidden><button type="button" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button><img alt=""></div>
 
-<script src="vault.js"></script>
+<script src="vault.js" async id="vault-js"></script>
 <script>
 (function () {
   "use strict";
@@ -413,9 +418,18 @@
     for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
     return out;
   }
+  // vault.js loads async so the gate paints immediately; wait for it here
+  function vaultReady() {
+    if (window.VAULT) return Promise.resolve(window.VAULT);
+    return new Promise(function (resolve, reject) {
+      var el = document.getElementById("vault-js");
+      if (!el) return reject(new Error("vault.js not found"));
+      el.addEventListener("load", function () { window.VAULT ? resolve(window.VAULT) : reject(new Error("vault.js is empty")); });
+      el.addEventListener("error", function () { reject(new Error("could not download the vault")); });
+    });
+  }
   async function unlock(password) {
-    var V = window.VAULT;
-    if (!V) throw new Error("vault.js not found");
+    var V = await vaultReady();
     var km = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
     var key = await crypto.subtle.deriveKey(
       { name: "PBKDF2", salt: b64ToBytes(V.salt), iterations: V.it || 600000, hash: "SHA-256" },
@@ -425,19 +439,20 @@
     try {
       plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64ToBytes(V.iv) }, key, b64ToBytes(V.data));
     } catch (e) { throw new Error("wrong password"); }
+    S.key = key;
     return JSON.parse(new TextDecoder().decode(plain));
   }
 
   /* ============================== state =============================== */
   var $ = function (id) { return document.getElementById(id); };
-  var S = { data: null, blobs: {}, q: "", author: "", scrollY: 0 };
+  var S = { data: null, blobs: {}, pending: {}, gen: 0, key: null, io: null, q: "", author: "", scrollY: 0 };
 
   // assets arrive as data: URIs; turn each into a blob: URL once (video needs it on Safari)
   function asset(key) {
     if (!key) return null;
     if (S.blobs[key]) return S.blobs[key];
     var d = S.data.assets[key];
-    if (!d) return null;
+    if (!d || typeof d !== "string") return null;   // lazy assets come through loadLazy()
     var comma = d.indexOf(",");
     var mime = d.slice(5, d.indexOf(";"));
     var url = URL.createObjectURL(new Blob([b64ToBytes(d.slice(comma + 1))], { type: mime }));
@@ -537,18 +552,67 @@
       "</div>";
   }
 
+  function isLazy(key) { var a = key && S.data.assets[key]; return !!a && typeof a === "object"; }
+
+  // Images and video are separate encrypted files (m/*.bin). They are rendered as placeholders
+  // with the right shape and fetched + decrypted only when scrolled near (see observeLazy).
   function mediaHtml(list) {
     if (!list || !list.length) return "";
     var n = Math.min(list.length, 4);
     return '<div class="media n' + n + '">' + list.slice(0, 4).map(function (m) {
-      var src = asset(m.src);
-      if (!src) return "";
+      var ratio = m.w && m.h ? ' style="aspect-ratio:' + m.w + " / " + m.h + '"' : "";
       if (m.type === "video") {
-        var poster = asset(m.poster);
-        return '<video controls playsinline preload="metadata" src="' + src + '"' + (poster ? ' poster="' + poster + '"' : "") + "></video>";
+        var vAttrs = isLazy(m.src) ? ' data-asset="' + esc(m.src) + '"' : ' src="' + asset(m.src) + '"';
+        if (m.poster) vAttrs += isLazy(m.poster) ? ' data-poster-asset="' + esc(m.poster) + '"' : ' poster="' + asset(m.poster) + '"';
+        return '<video controls playsinline preload="metadata"' + vAttrs + ratio + "></video>";
       }
-      return '<img src="' + src + '" alt="' + esc(m.alt || "") + '" loading="lazy" decoding="async" data-zoom>';
+      var iAttrs = isLazy(m.src) ? ' data-asset="' + esc(m.src) + '"' : ' src="' + asset(m.src) + '"';
+      return "<img" + iAttrs + ratio + ' alt="' + esc(m.alt || "") + '" decoding="async" data-zoom>';
     }).join("") + "</div>";
+  }
+
+  function loadLazy(key) {
+    if (S.blobs[key]) return Promise.resolve(S.blobs[key]);
+    if (S.pending[key]) return S.pending[key];
+    var a = S.data.assets[key], gen = S.gen;
+    S.pending[key] = fetch(a.f).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.arrayBuffer();
+    }).then(function (buf) {
+      var bytes = new Uint8Array(buf);
+      return crypto.subtle.decrypt({ name: "AES-GCM", iv: bytes.slice(0, 12) }, S.key, bytes.slice(12));
+    }).then(function (plain) {
+      if (gen !== S.gen) throw new Error("locked");
+      var url = URL.createObjectURL(new Blob([plain], { type: a.t }));
+      S.blobs[key] = url;
+      return url;
+    }).finally(function () { delete S.pending[key]; });
+    return S.pending[key];
+  }
+
+  function fill(el) {
+    var k = el.getAttribute("data-asset"), pk = el.getAttribute("data-poster-asset");
+    if (pk) loadLazy(pk).then(function (u) { el.poster = u; }, function () {});
+    if (k) {
+      el.classList.add("loading");
+      loadLazy(k).then(function (u) { el.src = u; el.classList.remove("loading"); },
+        function () { el.classList.remove("loading"); el.classList.add("failed"); });
+    }
+  }
+
+  function observeLazy(root) {
+    var els = root.querySelectorAll("[data-asset], [data-poster-asset]");
+    if (!els.length) return;
+    if (!S.io) {
+      S.io = "IntersectionObserver" in window ? new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          S.io.unobserve(e.target);
+          fill(e.target);
+        });
+      }, { rootMargin: "1200px 0px" }) : null;
+    }
+    els.forEach(function (el) { S.io ? S.io.observe(el) : fill(el); });
   }
 
   function actions(st, url) {
@@ -717,6 +781,7 @@
   }
 
   function afterRender(root, q) {
+    observeLazy(root);
     if (q) highlight(root, q);
   }
 
@@ -797,6 +862,7 @@
       return;
     }
     var img = el.closest("img[data-zoom]");
+    if (img && !img.getAttribute("src")) return;
     if (img) {
       var lb = $("lightbox");
       lb.querySelector("img").src = img.src;
@@ -813,7 +879,7 @@
   }
 
   function render(payload) {
-    if (!payload || payload.version !== 2) throw new Error("vault format not supported");
+    if (!payload || (payload.version !== 2 && payload.version !== 3)) throw new Error("vault format not supported");
     S.data = payload;
     var me = { name: "Cem Ozer", handle: "cemozerr" };
     $("rail-me").innerHTML = '<img class="av" src="/portrait-160.jpg" alt="" onerror="this.style.visibility=\'hidden\'">' + '<div class="who"><div style="font-weight:700">' + esc(me.name) + '</div><div style="color:var(--muted)">' + payload.bookmarks.length + " bookmarks</div></div>";
@@ -824,6 +890,8 @@
 
   function lock() {
     Object.keys(S.blobs).forEach(function (k) { URL.revokeObjectURL(S.blobs[k]); });
+    if (S.io) { S.io.disconnect(); S.io = null; }
+    S.key = null; S.pending = {}; S.gen++;
     S.data = null; S.blobs = {}; S.fromList = false; S.q = ""; S.author = ""; S.scrollY = 0;
     $("view").textContent = ""; $("people").textContent = ""; $("rail-me").textContent = "";
     $("q").value = ""; $("pw").value = ""; $("err").textContent = "";
