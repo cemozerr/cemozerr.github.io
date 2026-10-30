@@ -2,388 +2,880 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Bookmarks — locked</title>
-<link rel="icon" href="data:,">
+<meta name="color-scheme" content="light dark">
+<title>Bookmarks</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z' fill='%231d9bf0'/%3E%3C/svg%3E">
 <style>
   :root {
     --bg: #ffffff;
-    --fg: #16181c;
-    --muted: #5b6570;
-    --rule: #e6e8eb;
-    --card: #f7f8f9;
-    --hover: #fafbfc;
-    --accent: #1d6fd0;
-    --accent-fg: #ffffff;
-    --err: #c0392b;
-    --col: 620px;
+    --fg: #0f1419;
+    --muted: #536471;
+    --line: #eff3f4;
+    --line-strong: #cfd9de;
+    --hover: rgba(15, 20, 25, .03);
+    --press: rgba(15, 20, 25, .1);
+    --field: #eff3f4;
+    --card: #f7f9f9;
+    --blue: #1d9bf0;
+    --blue-soft: rgba(29, 155, 240, .1);
+    --pink: #f91880;
+    --pink-soft: rgba(249, 24, 128, .1);
+    --green: #00ba7c;
+    --green-soft: rgba(0, 186, 124, .1);
+    --mark: rgba(255, 212, 0, .45);
+    --scrim: rgba(0, 0, 0, .9);
+    --shadow: 0 0 15px rgba(101, 119, 134, .2), 0 0 3px 1px rgba(101, 119, 134, .15);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #0f1114;
+      --bg: #000000;
       --fg: #e7e9ea;
-      --muted: #9aa4ae;
-      --rule: #24282d;
-      --card: #171a1e;
-      --hover: #14171b;
-      --accent: #6aa9f0;
-      --accent-fg: #06121f;
-      --err: #f0776a;
+      --muted: #71767b;
+      --line: #2f3336;
+      --line-strong: #333639;
+      --hover: rgba(231, 233, 234, .03);
+      --press: rgba(231, 233, 234, .1);
+      --field: #202327;
+      --card: #16181c;
+      --mark: rgba(255, 212, 0, .3);
+      --shadow: 0 0 15px rgba(255, 255, 255, .2), 0 0 3px 1px rgba(255, 255, 255, .15);
     }
   }
+
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
     background: var(--bg);
     color: var(--fg);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    font-size: 16px;
-    line-height: 1.55;
+    font-size: 15px;
+    line-height: 20px;
+    -webkit-font-smoothing: antialiased;
   }
-  a { color: var(--accent); }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  svg.i { width: 1.25em; height: 1.25em; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+  mark { background: var(--mark); color: inherit; border-radius: 2px; }
+  [hidden] { display: none !important; }
 
-  /* ---------- gate ---------- */
-  #gate { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; }
-  .gate-box { width: 100%; max-width: 22rem; }
-  .gate-box h1 { font-size: 1.15rem; margin: 0 0 .35rem; letter-spacing: -.01em; }
-  .gate-box p { color: var(--muted); font-size: .86rem; margin: 0 0 1.4rem; }
-  label { display: block; font-size: .78rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: .4rem; }
-  input[type=password] {
-    width: 100%; padding: .7rem .8rem; font-size: 1rem; font-family: inherit;
-    color: var(--fg); background: var(--card);
-    border: 1px solid var(--rule); border-radius: 9px; outline: none;
+  /* ---------------- gate ---------------- */
+  #gate { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px 16px; }
+  .gate-box { width: 100%; max-width: 360px; }
+  .gate-mark { width: 44px; height: 44px; color: var(--blue); margin-bottom: 28px; }
+  .gate-mark svg { width: 44px; height: 44px; fill: var(--blue); stroke: none; }
+  .gate-box h1 { font-size: 31px; line-height: 36px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 8px; }
+  .gate-box p { color: var(--muted); margin: 0 0 28px; }
+  .field {
+    position: relative; border: 1px solid var(--line-strong); border-radius: 4px;
+    padding: 22px 8px 6px; transition: border-color .15s, box-shadow .15s;
   }
-  input[type=password]:focus { border-color: var(--accent); }
-  button {
-    font-family: inherit; font-size: .95rem; font-weight: 600;
-    border: none; border-radius: 9px; cursor: pointer;
-    padding: .7rem 1rem; background: var(--accent); color: var(--accent-fg);
+  .field:focus-within { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+  .field label { position: absolute; left: 8px; top: 7px; font-size: 13px; line-height: 16px; color: var(--muted); }
+  .field:focus-within label { color: var(--blue); }
+  .field input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--fg); font: inherit; font-size: 17px; line-height: 24px; padding: 0; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 36px; padding: 0 16px; border-radius: 9999px;
+    font-weight: 700; font-size: 15px; transition: background-color .15s, opacity .15s;
   }
-  button.secondary { background: transparent; color: var(--muted); border: 1px solid var(--rule); font-weight: 500; }
-  button:disabled { opacity: .55; cursor: default; }
-  #go { width: 100%; margin-top: .8rem; }
-  #err { color: var(--err); font-size: .85rem; margin-top: .7rem; min-height: 1.2em; }
+  .btn-primary { background: var(--fg); color: var(--bg); }
+  .btn-primary:hover { opacity: .9; }
+  .btn-primary:disabled { opacity: .5; cursor: default; }
+  .btn-lg { min-height: 52px; font-size: 17px; width: 100%; margin-top: 20px; }
+  .btn-outline { border: 1px solid var(--line-strong); }
+  .btn-outline:hover { background: var(--hover); }
+  #err { color: #f4212e; font-size: 14px; margin-top: 12px; min-height: 20px; }
+  .gate-foot { color: var(--muted); font-size: 13px; margin-top: 28px; }
 
-  /* ---------- app ---------- */
-  #app { display: none; }
-
-  header.bar {
-    position: sticky; top: 0; z-index: 20;
-    display: flex; align-items: center; gap: .8rem;
-    padding: .65rem 1rem;
-    background: color-mix(in srgb, var(--bg) 86%, transparent);
-    backdrop-filter: blur(12px) saturate(1.2);
-    border-bottom: 1px solid var(--rule);
+  /* ---------------- layout ---------------- */
+  #app { display: flex; justify-content: center; min-height: 100vh; }
+  .rail {
+    position: sticky; top: 0; height: 100vh; height: 100dvh;
+    width: 88px; flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end;
+    padding: 4px 12px 12px;
   }
-  header.bar .name { font-weight: 700; font-size: .97rem; letter-spacing: -.01em; }
-  header.bar .count { color: var(--muted); font-size: .78rem; }
-  header.bar .spacer { flex: 1; }
-  header.bar button { padding: .35rem .7rem; font-size: .8rem; }
-
-  .chips {
-    position: sticky; top: 47px; z-index: 19;
-    display: flex; gap: .45rem; overflow-x: auto; scrollbar-width: none;
-    padding: .5rem 1rem; border-bottom: 1px solid var(--rule);
-    background: color-mix(in srgb, var(--bg) 86%, transparent);
-    backdrop-filter: blur(12px) saturate(1.2);
+  .rail-inner { width: 64px; display: flex; flex-direction: column; align-items: center; height: 100%; }
+  .rail-brand { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 9999px; margin: 2px 0 4px; color: var(--fg); }
+  .rail-brand:hover { background: var(--press); text-decoration: none; }
+  .rail-brand svg { width: 28px; height: 28px; fill: var(--fg); stroke: none; }
+  .nav-item {
+    display: flex; align-items: center; gap: 20px; padding: 12px; border-radius: 9999px;
+    font-size: 20px; line-height: 24px; color: var(--fg); transition: background-color .15s;
   }
-  .chips::-webkit-scrollbar { display: none; }
-  .chip {
-    flex: 0 0 auto; white-space: nowrap; cursor: pointer;
-    font-size: .78rem; font-weight: 600; color: var(--muted);
-    background: var(--card); border: 1px solid var(--rule);
-    border-radius: 999px; padding: .28rem .7rem;
-  }
-  .chip:hover { color: var(--fg); border-color: var(--accent); }
-  .chip .h { color: var(--accent); margin-right: .3rem; font-weight: 700; }
+  .nav-item:hover { background: var(--press); text-decoration: none; }
+  .nav-item svg.i { width: 26px; height: 26px; }
+  .nav-item.active { font-weight: 700; }
+  .nav-item.active svg.i { fill: var(--fg); }
+  .nav-item .lbl { display: none; }
+  .rail-spacer { flex: 1; }
+  .rail-me { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 9999px; }
+  .rail-me .who { display: none; min-width: 0; }
 
-  /* ---------- feed ---------- */
-  main { max-width: var(--col); margin: 0 auto; }
-
-  .item { border-bottom: 1px solid var(--rule); transition: background .12s ease; scroll-margin-top: 92px; }
-  .item:hover { background: var(--hover); }
-
-  .row {
-    display: flex; gap: .65rem; align-items: flex-start;
-    padding: 1rem 1.1rem .5rem;
+  .col {
+    width: 100%; max-width: 600px; min-height: 100vh;
+    border-left: 1px solid var(--line); border-right: 1px solid var(--line);
   }
-  .row .av {
-    width: 38px; height: 38px; border-radius: 50%; flex: 0 0 auto;
-    object-fit: cover; background: var(--card);
-  }
-  .row .ident { min-width: 0; flex: 1; }
-  .row .line1 { display: flex; align-items: baseline; gap: .35rem; flex-wrap: wrap; }
-  .row .nm { font-weight: 700; font-size: .95rem; letter-spacing: -.01em; }
-  .row .hd { color: var(--muted); font-size: .85rem; }
-  .row .meta { color: var(--muted); font-size: .78rem; margin-top: .1rem; }
-  .row time { color: var(--muted); font-size: .76rem; white-space: nowrap; padding-top: .12rem; }
+  .side { width: 350px; flex: 0 0 auto; padding: 0 0 64px 30px; display: none; }
+  .side-sticky { position: sticky; top: 0; padding-top: 8px; }
 
-  .item iframe {
-    display: block; width: 100%; border: 0; background: var(--bg);
-    overflow: hidden; height: 220px;
-    transition: opacity .18s ease;
+  @media (min-width: 1000px) { .side { display: block; } }
+  @media (min-width: 1265px) {
+    .rail { width: 275px; align-items: flex-start; padding-left: 8px; }
+    .rail-inner { width: 255px; align-items: flex-start; }
+    .nav-item { padding: 12px 24px 12px 12px; }
+    .nav-item .lbl { display: inline; }
+    .rail-me .who { display: block; }
+    .rail-me { width: 100%; }
   }
-  .item.pending iframe { opacity: 0; }
-  .item.pending::after {
-    content: ""; display: block; height: 1px;
+  @media (max-width: 699px) {
+    .rail { display: none; }
+    .col { border: 0; }
   }
 
-  #totop {
-    position: fixed; right: 1rem; bottom: 1rem; z-index: 30;
-    width: 2.6rem; height: 2.6rem; border-radius: 999px; padding: 0;
-    display: none; place-items: center; font-size: 1rem;
-    box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  /* ---------------- column header ---------------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-row { display: flex; align-items: center; gap: 12px; min-height: 53px; padding: 0 16px; }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 9999px; display: grid; place-items: center;
+    transition: background-color .15s; margin-left: -8px; flex: 0 0 auto;
+  }
+  .icon-btn:hover { background: var(--press); }
+  .icon-btn svg.i { width: 20px; height: 20px; stroke-width: 2; }
+  .topbar-title { min-width: 0; flex: 1; }
+  .topbar-title h2 { margin: 0; font-size: 20px; line-height: 24px; font-weight: 700; letter-spacing: -.01em; }
+  .topbar-title .sub { color: var(--muted); font-size: 13px; line-height: 16px; }
+  .topbar .mobile-only { display: none; }
+  @media (max-width: 699px) { .topbar .mobile-only { display: grid; } }
+  .search-row { padding: 0 16px 10px; }
+  .search {
+    display: flex; align-items: center; gap: 12px; height: 42px; padding: 0 16px;
+    background: var(--field); border: 1px solid var(--field); border-radius: 9999px; color: var(--muted);
+  }
+  .search:focus-within { background: var(--bg); border-color: var(--blue); color: var(--blue); }
+  .search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--fg); font: inherit; font-size: 15px; }
+  .search input::placeholder { color: var(--muted); }
+  .search .clear { width: 22px; height: 22px; border-radius: 9999px; background: var(--blue); color: #fff; display: grid; place-items: center; }
+  .search .clear svg.i { width: 14px; height: 14px; stroke-width: 2.5; }
+  .filter-pill {
+    display: inline-flex; align-items: center; gap: 6px; margin: 0 16px 10px;
+    padding: 4px 6px 4px 12px; border-radius: 9999px; background: var(--blue-soft); color: var(--blue);
+    font-size: 14px; font-weight: 600;
+  }
+  .filter-pill button { width: 22px; height: 22px; border-radius: 9999px; display: grid; place-items: center; }
+  .filter-pill button:hover { background: var(--blue-soft); }
+  .filter-pill svg.i { width: 14px; height: 14px; stroke-width: 2.5; }
+
+  /* ---------------- tweets ---------------- */
+  .tw {
+    position: relative; display: flex; gap: 8px; padding: 12px 16px 0;
+    border-bottom: 1px solid var(--line); cursor: pointer; transition: background-color .2s;
+  }
+  .tw:hover { background: var(--hover); }
+  .tw.static { cursor: default; }
+  .tw.static:hover { background: transparent; }
+  .tw.chain { border-bottom: 0; }
+  .tw-gutter { position: relative; width: 40px; flex: 0 0 40px; display: flex; flex-direction: column; align-items: center; }
+  .tw-line-top { position: absolute; top: -12px; height: 8px; width: 2px; background: var(--line-strong); left: 19px; }
+  .tw-line { flex: 1; width: 2px; background: var(--line-strong); margin-top: 4px; min-height: 12px; }
+  .tw-main { min-width: 0; flex: 1; padding-bottom: 12px; }
+  .av {
+    width: 40px; height: 40px; border-radius: 9999px; object-fit: cover; display: block; flex: 0 0 auto;
+    background: var(--field);
+  }
+  .av-fallback { display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 17px; }
+  .av-sm { width: 20px; height: 20px; font-size: 11px; }
+  .tw-head { display: flex; align-items: center; gap: 4px; min-width: 0; white-space: nowrap; }
+  .tw-head .nm { font-weight: 700; overflow: hidden; text-overflow: ellipsis; color: var(--fg); }
+  .tw-head a.nm:hover { text-decoration: underline; }
+  .tw-head .hd, .tw-head .dot, .tw-head time { color: var(--muted); }
+  .tw-head .hd { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .tw-head .dot { padding: 0 1px; }
+  .tw-head time { flex: 0 0 auto; }
+  .tw-head .more { margin-left: auto; color: var(--muted); }
+  .vbadge { width: 18px; height: 18px; flex: 0 0 auto; }
+  .vbadge circle { fill: var(--blue); }
+  .vbadge path { stroke: #fff; stroke-width: 2.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .tw-text { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; margin-top: 2px; }
+  .tw-text.clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 10; overflow: hidden; }
+  .show-more { color: var(--blue); margin-top: 2px; display: inline-block; }
+  .show-more:hover { text-decoration: underline; }
+  .reply-ctx { color: var(--muted); margin-top: 2px; }
+
+  .media { margin-top: 12px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: grid; gap: 2px; background: var(--line); }
+  .media.n2 { grid-template-columns: 1fr 1fr; aspect-ratio: 16 / 9; }
+  .media.n3, .media.n4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; aspect-ratio: 16 / 9; }
+  .media.n3 > :first-child { grid-row: span 2; }
+  .media img, .media video { display: block; width: 100%; background: #000; }
+  .media.n1 img { max-height: 510px; height: auto; object-fit: cover; cursor: zoom-in; background: var(--card); }
+  .media.n2 img, .media.n3 img, .media.n4 img { height: 100%; object-fit: cover; cursor: zoom-in; }
+  .media video { max-height: 510px; }
+
+  .quote {
+    margin-top: 12px; border: 1px solid var(--line-strong); border-radius: 16px; overflow: hidden;
+    transition: background-color .2s;
+  }
+  .quote:hover { background: var(--hover); }
+  .quote-body { padding: 12px; }
+  .quote .tw-head { gap: 4px; }
+  .quote .tw-head .av { width: 20px; height: 20px; margin-right: 2px; }
+  .quote .tw-text { margin-top: 4px; }
+  .quote .tw-text.clamp { -webkit-line-clamp: 6; }
+  .quote .media { margin: 12px 0 0; border-radius: 0; border: 0; border-top: 1px solid var(--line); }
+  .quote .quote-body + .media { margin-top: 0; }
+  .quote-thread-link { display: block; color: var(--blue); margin-top: 8px; font-size: 15px; }
+  .quote-thread { border-top: 1px solid var(--line); }
+  .quote-thread .tw { padding-left: 12px; padding-right: 12px; cursor: default; }
+  .quote-thread .tw:hover { background: transparent; }
+  .quote-thread .tw:last-child { border-bottom: 0; }
+
+  .thread-hint { display: inline-block; color: var(--blue); margin-top: 12px; }
+  .thread-hint:hover { text-decoration: underline; }
+
+  .actions { display: flex; justify-content: space-between; margin-top: 12px; max-width: 425px; color: var(--muted); }
+  .act { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; line-height: 16px; min-width: 0; }
+  .act .ic { width: 34px; height: 34px; margin: -8px -4px -8px -8px; border-radius: 9999px; display: grid; place-items: center; transition: background-color .15s, color .15s; }
+  .act .ic svg.i { width: 18.75px; height: 18.75px; }
+  .act .n { padding: 0 4px; transition: color .15s; }
+  .act.reply:hover, .act.views:hover, .act.share:hover { color: var(--blue); }
+  .act.reply:hover .ic, .act.views:hover .ic, .act.share:hover .ic, .act.bm:hover .ic { background: var(--blue-soft); }
+  .act.repost:hover { color: var(--green); }
+  .act.repost:hover .ic { background: var(--green-soft); }
+  .act.like:hover { color: var(--pink); }
+  .act.like:hover .ic { background: var(--pink-soft); }
+  .act.bm { color: var(--blue); }
+  .act.bm svg.i { fill: var(--blue); }
+  .act-end { display: inline-flex; gap: 12px; }
+
+  /* focal tweet (detail view) */
+  .focal { padding: 12px 16px 0; border-bottom: 1px solid var(--line); }
+  .focal.chain { border-bottom: 0; }
+  .focal-head { display: flex; gap: 8px; align-items: center; }
+  .focal-head .who { min-width: 0; line-height: 20px; }
+  .focal-head .nm { display: flex; align-items: center; gap: 4px; font-weight: 700; color: var(--fg); }
+  .focal-head .hd { color: var(--muted); }
+  .focal-gutter { width: 40px; display: flex; justify-content: center; }
+  .focal .tw-text { font-size: 17px; line-height: 24px; margin-top: 12px; }
+  .focal-meta { color: var(--muted); padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .focal-meta b { color: var(--fg); font-weight: 700; }
+  .focal-meta a { color: var(--muted); }
+  .focal-stats { display: flex; flex-wrap: wrap; gap: 4px 20px; padding: 16px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  .focal-stats b { color: var(--fg); font-weight: 700; }
+  .focal .actions { max-width: none; justify-content: space-around; margin: 0; padding: 4px 0; min-height: 48px; align-items: center; }
+  .focal .act .ic svg.i { width: 22.5px; height: 22.5px; }
+  .focal .act .n { display: none; }
+
+  .section-h { padding: 16px 16px 4px; font-size: 20px; line-height: 24px; font-weight: 800; letter-spacing: -.01em; }
+  .section-h .sub { display: block; font-size: 13px; line-height: 16px; font-weight: 400; color: var(--muted); margin-top: 2px; letter-spacing: 0; }
+  .note {
+    margin: 12px 16px; border: 1px solid var(--line-strong); border-radius: 16px; overflow: hidden;
+  }
+  .note summary {
+    list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px; font-weight: 700;
+  }
+  .note summary::-webkit-details-marker { display: none; }
+  .note summary .chev { margin-left: auto; color: var(--muted); transition: transform .2s; }
+  .note[open] summary .chev { transform: rotate(180deg); }
+  .note summary .tag { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .note-body { padding: 0 16px 14px; color: var(--fg); }
+  .note-body p { margin: 0 0 10px; }
+  .note-body p:last-child { margin-bottom: 0; }
+  .note-body code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; background: var(--field); padding: 1px 5px; border-radius: 4px; }
+  .note-body ul { margin: 6px 0 0; padding-left: 20px; }
+  .capture { padding: 16px; color: var(--muted); font-size: 13px; line-height: 18px; border-top: 1px solid var(--line); }
+  .capture a { display: inline-flex; align-items: center; gap: 4px; font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+
+  /* ---------------- empty / end ---------------- */
+  .empty { padding: 40px 32px; max-width: 400px; margin: 0 auto; }
+  .empty h3 { font-size: 31px; line-height: 36px; font-weight: 800; margin: 0 0 8px; letter-spacing: -.02em; }
+  .empty p { color: var(--muted); margin: 0; }
+  .end { padding: 32px 16px 80px; color: var(--muted); font-size: 13px; text-align: center; }
+
+  /* ---------------- sidebar ---------------- */
+  .panel { border: 1px solid var(--line); border-radius: 16px; margin-top: 16px; overflow: hidden; }
+  .panel h3 { margin: 0; padding: 12px 16px; font-size: 20px; line-height: 24px; font-weight: 800; letter-spacing: -.01em; }
+  .person { display: flex; align-items: center; gap: 12px; padding: 12px 16px; width: 100%; text-align: left; transition: background-color .2s; }
+  .person:hover { background: var(--hover); }
+  .person.on { background: var(--blue-soft); }
+  .person .who { min-width: 0; flex: 1; line-height: 20px; }
+  .person .nm { display: flex; align-items: center; gap: 4px; font-weight: 700; }
+  .person .nm span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .person .hd { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .person .count { color: var(--muted); font-size: 13px; }
+  .side-foot { color: var(--muted); font-size: 13px; line-height: 16px; padding: 16px; }
+
+  /* ---------------- lightbox ---------------- */
+  #lightbox { position: fixed; inset: 0; z-index: 100; background: var(--scrim); display: grid; place-items: center; cursor: zoom-out; }
+  #lightbox img { max-width: 100vw; max-height: 100vh; object-fit: contain; }
+  #lightbox button { position: absolute; top: 12px; left: 12px; width: 36px; height: 36px; border-radius: 9999px; background: rgba(15, 20, 25, .75); color: #fff; display: grid; place-items: center; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 90;
+    background: var(--blue); color: #fff; padding: 12px 16px; border-radius: 4px; font-size: 15px;
+    box-shadow: var(--shadow);
   }
 
-  .foot { max-width: var(--col); margin: 0 auto; padding: 1.75rem 1.1rem 4rem; color: var(--muted); font-size: .8rem; }
-  @media print { .chips, #totop, header.bar { display: none !important; } }
+  @media (max-width: 499px) {
+    .tw { padding-left: 12px; padding-right: 12px; }
+    .focal { padding-left: 12px; padding-right: 12px; }
+    .actions .act.views, .actions .act.share { display: none; }
+  }
+  @media print {
+    .rail, .side, .topbar, .actions, .act-end { display: none !important; }
+    .col { border: 0; max-width: none; }
+    .tw-text.clamp { -webkit-line-clamp: unset; display: block; }
+  }
 </style>
 </head>
 <body>
 
 <div id="gate">
-  <div class="gate-box">
+  <form class="gate-box" id="gate-form" autocomplete="on">
+    <div class="gate-mark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>
     <h1>Bookmarks</h1>
-    <p>Encrypted with AES-256-GCM. The password never leaves this page.</p>
-    <label for="pw">Password</label>
-    <input id="pw" type="password" autocomplete="current-password" autofocus>
-    <button id="go">Unlock</button>
-    <div id="err"></div>
-  </div>
+    <p>A private archive. Enter the password to decrypt it in this browser.</p>
+    <input type="text" name="username" value="bookmarks" autocomplete="username" hidden>
+    <div class="field">
+      <label for="pw">Password</label>
+      <input id="pw" type="password" autocomplete="current-password" autofocus>
+    </div>
+    <button class="btn btn-primary btn-lg" id="go" type="submit">Unlock</button>
+    <div id="err" role="alert"></div>
+    <div class="gate-foot">AES-256-GCM. The password never leaves this page.</div>
+  </form>
 </div>
 
-<div id="app">
-  <header class="bar">
-    <div>
-      <div class="name">Bookmarks</div>
-      <div class="count" id="count"></div>
+<div id="app" hidden>
+  <header class="rail">
+    <div class="rail-inner">
+      <a class="rail-brand" href="/" title="cemozer.co" aria-label="cemozer.co home"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></a>
+      <a class="nav-item" href="/"><svg class="i" viewBox="0 0 24 24"><path d="M3 9.5l9-7 9 7V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="lbl">Home</span></a>
+      <a class="nav-item active" href="#" id="nav-bm"><svg class="i" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><span class="lbl">Bookmarks</span></a>
+      <button class="nav-item" type="button" data-lock><svg class="i" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="11" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="lbl">Lock</span></button>
+      <div class="rail-spacer"></div>
+      <div class="rail-me" id="rail-me"></div>
     </div>
-    <div class="spacer"></div>
-    <button class="secondary" id="lock">Lock</button>
   </header>
 
-  <nav class="chips" id="chips" aria-label="Jump to post"></nav>
+  <main class="col">
+    <div class="topbar">
+      <div class="topbar-row">
+        <button class="icon-btn" id="back" type="button" aria-label="Back" hidden><svg class="i" viewBox="0 0 24 24"><path d="M20 12H4"/><path d="M11 19l-7-7 7-7"/></svg></button>
+        <div class="topbar-title">
+          <h2 id="title">Bookmarks</h2>
+          <div class="sub" id="subtitle"></div>
+        </div>
+        <button class="icon-btn mobile-only" type="button" data-lock aria-label="Lock"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="11" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></button>
+      </div>
+      <div class="search-row" id="search-row">
+        <label class="search">
+          <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="q" type="search" placeholder="Search Bookmarks" autocomplete="off" spellcheck="false">
+          <button class="clear" id="q-clear" type="button" aria-label="Clear search" hidden><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </label>
+      </div>
+      <div id="filter-pill-wrap" hidden><span class="filter-pill"><span id="filter-pill-text"></span><button type="button" id="filter-clear" aria-label="Clear filter"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span></div>
+    </div>
+    <div id="view"></div>
+  </main>
 
-  <main id="feed"></main>
-
-  <div class="foot">
-    Everything on this page — text, images, video — is inside one encrypted vault. Nothing is readable without the password, including from the page source.
-  </div>
-
-  <button id="totop" class="secondary" aria-label="Back to top">&uarr;</button>
+  <aside class="side">
+    <div class="side-sticky">
+      <div class="panel">
+        <h3>Saved from</h3>
+        <div id="people"></div>
+      </div>
+      <div class="side-foot">Everything on this page — text, images, video — is decrypted locally from one encrypted file. Locking wipes it from the page.</div>
+    </div>
+  </aside>
 </div>
+
+<div id="lightbox" hidden><button type="button" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button><img alt=""></div>
 
 <script src="vault.js"></script>
 <script>
 (function () {
   "use strict";
 
-  var $ = function (id) { return document.getElementById(id); };
-  var state = { posts: [], observer: null };
-
+  /* ============================== crypto ============================== */
   function b64ToBytes(b64) {
     var bin = atob(b64), out = new Uint8Array(bin.length);
     for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
     return out;
   }
-
-  async function derive(password, salt, iterations) {
-    var km = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
-    return crypto.subtle.deriveKey(
-      { name: "PBKDF2", salt: salt, iterations: iterations, hash: "SHA-256" },
-      km, { name: "AES-GCM", length: 256 }, false, ["decrypt"]
-    );
-  }
-
   async function unlock(password) {
     var V = window.VAULT;
     if (!V) throw new Error("vault.js not found");
-    var key = await derive(password, b64ToBytes(V.salt), V.it || 600000);
+    var km = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+    var key = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: b64ToBytes(V.salt), iterations: V.it || 600000, hash: "SHA-256" },
+      km, { name: "AES-GCM", length: 256 }, false, ["decrypt"]
+    );
     var plain;
     try {
       plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64ToBytes(V.iv) }, key, b64ToBytes(V.data));
-    } catch (e) {
-      throw new Error("wrong password");
-    }
+    } catch (e) { throw new Error("wrong password"); }
     return JSON.parse(new TextDecoder().decode(plain));
   }
 
-  function fmtDate(iso) {
-    var d = new Date(iso + "T12:00:00Z");
-    if (isNaN(d)) return iso;
-    return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  /* ============================== state =============================== */
+  var $ = function (id) { return document.getElementById(id); };
+  var S = { data: null, blobs: {}, q: "", author: "", scrollY: 0 };
+
+  // assets arrive as data: URIs; turn each into a blob: URL once (video needs it on Safari)
+  function asset(key) {
+    if (!key) return null;
+    if (S.blobs[key]) return S.blobs[key];
+    var d = S.data.assets[key];
+    if (!d) return null;
+    var comma = d.indexOf(",");
+    var mime = d.slice(5, d.indexOf(";"));
+    var url = URL.createObjectURL(new Blob([b64ToBytes(d.slice(comma + 1))], { type: mime }));
+    S.blobs[key] = url;
+    return url;
   }
 
-  function fit(frame) {
-    try {
-      var d = frame.contentDocument;
-      if (!d) return;
-      var h = Math.max(
-        d.documentElement ? d.documentElement.scrollHeight : 0,
-        d.body ? d.body.scrollHeight : 0
-      );
-      var cur = parseFloat(frame.style.height) || 0;
-      if (h > 50 && Math.abs(h - cur) > 2) frame.style.height = h + "px";
-    } catch (e) { /* ignore */ }
-  }
+  /* ============================== helpers ============================= */
+  var ICONS = {
+    reply: '<path d="M4.5 12a7.5 7.5 0 0 1 7.5-7.5h.5a7 7 0 0 1 0 14H8l-3.5 3v-4.2A7.47 7.47 0 0 1 4.5 12z"/>',
+    repost: '<path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/>',
+    like: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/>',
+    views: '<path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>',
+    bm: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+    share: '<path d="M12 3v13"/><path d="M7 8l5-5 5 5"/><path d="M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/>',
+    out: '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/>',
+    note: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/>',
+    chev: '<path d="M6 9l6 6 6-6"/>'
+  };
+  function icon(name) { return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + ICONS[name] + "</svg>"; }
+  var VBADGE = '<svg class="vbadge" viewBox="0 0 24 24" aria-label="Verified"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.4l3 3 6-6.6"/></svg>';
 
-  function mount(card, post) {
-    if (card.dataset.mounted) return;
-    card.dataset.mounted = "1";
-    var frame = card.querySelector("iframe");
-
-    frame.addEventListener("load", function () {
-      var settle = function () { fit(frame); };
-      settle();
-      setTimeout(settle, 80);
-      setTimeout(settle, 400);
-      setTimeout(settle, 1200);
-      card.classList.remove("pending");
-      try {
-        var d = frame.contentDocument;
-        if (!d) return;
-        d.querySelectorAll("img, video").forEach(function (el) {
-          el.addEventListener("load", settle);
-          el.addEventListener("loadedmetadata", settle);
-        });
-        if (window.ResizeObserver) {
-          new ResizeObserver(settle).observe(d.documentElement);
-        }
-      } catch (e) { /* ignore */ }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
-
-    frame.srcdoc = post.embed || post.html;
   }
 
-  function render(payload) {
-    state.posts = payload.posts || [];
-    var feed = $("feed"), chips = $("chips");
-    feed.textContent = ""; chips.textContent = "";
-    $("count").textContent = state.posts.length + " saved";
-
-    state.observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) mount(e.target, state.posts[+e.target.dataset.i]);
-      });
-    }, { rootMargin: "1400px 0px 1400px 0px" });
-
-    state.posts.forEach(function (p, i) {
-      var card = document.createElement("section");
-      card.className = "item pending";
-      card.dataset.i = i;
-      card.id = "p" + i;
-
-      var row = document.createElement("div");
-      row.className = "row";
-
-      if (p.avatar) {
-        var av = document.createElement("img");
-        av.className = "av"; av.src = p.avatar; av.alt = ""; av.loading = "lazy";
-        row.appendChild(av);
+  // linkify plain text: URLs, @mentions, #hashtags
+  function richText(text) {
+    var re = /(https?:\/\/[^\s<]+[^\s<.,:;"')\]!?])|(^|[^\w@])@(\w{1,15})\b|(^|[^\w&#])#(\w*[A-Za-z_]\w*)/g;
+    var out = "", last = 0, m;
+    while ((m = re.exec(text))) {
+      out += esc(text.slice(last, m.index));
+      if (m[1]) {
+        var url = m[1];
+        var shown = url.replace(/^https?:\/\/(www\.)?/, "");
+        if (shown.length > 32) shown = shown.slice(0, 31) + "…";
+        out += '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(shown) + "</a>";
+      } else if (m[3]) {
+        out += esc(m[2]) + '<a href="https://x.com/' + m[3] + '" target="_blank" rel="noopener noreferrer">@' + esc(m[3]) + "</a>";
+      } else {
+        out += esc(m[4]) + '<a href="https://x.com/hashtag/' + m[5] + '" target="_blank" rel="noopener noreferrer">#' + esc(m[5]) + "</a>";
       }
+      last = re.lastIndex;
+    }
+    return out + esc(text.slice(last));
+  }
 
-      var ident = document.createElement("div");
-      ident.className = "ident";
-      var line1 = document.createElement("div");
-      line1.className = "line1";
-      var nm = document.createElement("span");
-      nm.className = "nm"; nm.textContent = p.name || p.handle;
-      var hd = document.createElement("span");
-      hd.className = "hd"; hd.textContent = p.handle;
-      line1.appendChild(nm); line1.appendChild(hd);
-      var meta = document.createElement("div");
-      meta.className = "meta";
-      meta.textContent = p.blurb || "";
-      ident.appendChild(line1); ident.appendChild(meta);
-      row.appendChild(ident);
+  function fmtNum(n) {
+    if (n == null) return "";
+    if (n < 1000) return String(n);
+    if (n < 10000) return (Math.floor(n / 100) / 10).toString().replace(/\.0$/, "") + "K";
+    if (n < 1e6) return Math.floor(n / 1000) + "K";
+    return (Math.floor(n / 1e5) / 10).toString().replace(/\.0$/, "") + "M";
+  }
+  function fmtFull(n) { return n == null ? "" : n.toLocaleString("en-US"); }
 
-      var t = document.createElement("time");
-      t.dateTime = p.date; t.textContent = fmtDate(p.date);
-      row.appendChild(t);
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function relTime(iso) {
+    if (!iso) return "";
+    var d = new Date(iso), now = new Date(), s = (now - d) / 1000;
+    if (s < 60) return Math.max(1, Math.floor(s)) + "s";
+    if (s < 3600) return Math.floor(s / 60) + "m";
+    if (s < 86400) return Math.floor(s / 3600) + "h";
+    var md = MONTHS[d.getMonth()] + " " + d.getDate();
+    return d.getFullYear() === now.getFullYear() ? md : md + ", " + d.getFullYear();
+  }
+  function fullTime(iso) {
+    var d = new Date(iso);
+    var h = d.getHours(), ap = h < 12 ? "AM" : "PM";
+    h = h % 12 || 12;
+    var mm = String(d.getMinutes()).padStart(2, "0");
+    return h + ":" + mm + " " + ap + " · " + MONTHS[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+  }
 
-      card.appendChild(row);
+  var AV_COLORS = ["#1d9bf0", "#7856ff", "#f91880", "#ff7a00", "#00ba7c", "#ffd400"];
+  function avatar(author, cls) {
+    var src = asset(author.avatar);
+    cls = "av" + (cls ? " " + cls : "");
+    if (src) return '<img class="' + cls + '" src="' + src + '" alt="" loading="lazy" decoding="async">';
+    var h = 0, s = author.handle || author.name || "?";
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return '<span class="' + cls + ' av-fallback" style="background:' + AV_COLORS[h % AV_COLORS.length] + '">' +
+      esc((author.name || author.handle || "?").trim().charAt(0).toUpperCase()) + "</span>";
+  }
+  function profileUrl(a) { return "https://x.com/" + encodeURIComponent(a.handle); }
 
-      var frame = document.createElement("iframe");
-      frame.title = p.title;
-      frame.setAttribute("scrolling", "no");
-      frame.style.height = "220px";
-      card.appendChild(frame);
-      feed.appendChild(card);
-      state.observer.observe(card);
+  function head(author, time, opts) {
+    opts = opts || {};
+    return '<div class="tw-head">' +
+      (opts.smallAvatar ? avatar(author, "av-sm") : "") +
+      '<a class="nm" href="' + profileUrl(author) + '" target="_blank" rel="noopener noreferrer">' + esc(author.name || author.handle) + "</a>" +
+      (author.verified ? VBADGE : "") +
+      '<span class="hd">@' + esc(author.handle) + "</span>" +
+      (time ? '<span class="dot">·</span><time datetime="' + esc(time) + '" title="' + esc(fullTime(time)) + '">' + relTime(time) + "</time>" : "") +
+      "</div>";
+  }
 
-      var chip = document.createElement("button");
-      chip.className = "chip";
-      chip.type = "button";
-      var h = document.createElement("span");
-      h.className = "h"; h.textContent = p.handle;
-      chip.appendChild(h);
-      chip.appendChild(document.createTextNode(p.title && p.title.length > 44 ? p.title.slice(0, 42) + "…" : (p.title || p.blurb || "")));
-      chip.addEventListener("click", function () {
-        mount(card, p);
-        var go = function (smooth) {
-          card.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
-        };
-        go(true);
-        setTimeout(function () { go(false); }, 350);
-        setTimeout(function () { go(false); }, 1100);
-      });
-      chips.appendChild(chip);
+  function mediaHtml(list) {
+    if (!list || !list.length) return "";
+    var n = Math.min(list.length, 4);
+    return '<div class="media n' + n + '">' + list.slice(0, 4).map(function (m) {
+      var src = asset(m.src);
+      if (!src) return "";
+      if (m.type === "video") {
+        var poster = asset(m.poster);
+        return '<video controls playsinline preload="metadata" src="' + src + '"' + (poster ? ' poster="' + poster + '"' : "") + "></video>";
+      }
+      return '<img src="' + src + '" alt="' + esc(m.alt || "") + '" loading="lazy" decoding="async" data-zoom>';
+    }).join("") + "</div>";
+  }
+
+  function actions(st, url) {
+    st = st || {};
+    var a = function (cls, ic, n, title) {
+      return '<span class="act ' + cls + '" title="' + esc(title) + '"><span class="ic">' + icon(ic) + '</span><span class="n">' + fmtNum(n) + "</span></span>";
+    };
+    return '<div class="actions">' +
+      a("reply", "reply", st.replies, (st.replies != null ? fmtFull(st.replies) + " " : "") + "Replies") +
+      a("repost", "repost", st.reposts, (st.reposts != null ? fmtFull(st.reposts) + " " : "") + "Reposts") +
+      a("like", "like", st.likes, (st.likes != null ? fmtFull(st.likes) + " " : "") + "Likes") +
+      a("views", "views", st.views, (st.views != null ? fmtFull(st.views) + " " : "") + "Views") +
+      '<span class="act-end">' +
+        '<span class="act bm" title="Bookmarked"><span class="ic">' + icon("bm") + "</span></span>" +
+        (url ? '<button type="button" class="act share" data-copy="' + esc(url) + '" title="Copy link"><span class="ic">' + icon("share") + "</span></button>" : "") +
+      "</span></div>";
+  }
+
+  function quoteHtml(q, bm, expanded) {
+    if (!q) return "";
+    var t = q.thread || [];
+    var link = q.url || bm.url;
+    var html = '<div class="quote" data-href="' + esc(link) + '"><div class="quote-body">' +
+      head(q.author, q.time, { smallAvatar: true }) +
+      '<div class="tw-text' + (expanded ? "" : " clamp") + '">' + richText(q.text) + "</div>";
+    if (t.length && !expanded) html += '<span class="quote-thread-link">Show this thread · ' + (t.length + 1) + " posts</span>";
+    html += "</div>" + mediaHtml(q.media);
+    if (t.length && expanded) {
+      html += '<div class="quote-thread">' + t.map(function (p, i) {
+        return tweetRow(q.author, p, bm, { static: true, chainUp: true, chainDown: i < t.length - 1, expanded: true, noActions: false });
+      }).join("") + "</div>";
+    }
+    return html + "</div>";
+  }
+
+  // one tweet row; opts: static, chainUp, chainDown, expanded, threadHint, slug
+  function tweetRow(author, t, bm, opts) {
+    opts = opts || {};
+    var cls = "tw" + (opts.static ? " static" : "") + (opts.chainDown ? " chain" : "");
+    return '<article class="' + cls + '"' + (opts.slug ? ' data-slug="' + esc(opts.slug) + '"' : "") + ">" +
+      '<div class="tw-gutter">' + (opts.chainUp ? '<span class="tw-line-top"></span>' : "") + avatar(author) + (opts.chainDown ? '<span class="tw-line"></span>' : "") + "</div>" +
+      '<div class="tw-main">' +
+        head(author, t.time) +
+        (opts.replyTo ? '<div class="reply-ctx">Replying to <a href="' + profileUrl(opts.replyTo) + '" target="_blank" rel="noopener noreferrer">@' + esc(opts.replyTo.handle) + "</a></div>" : "") +
+        '<div class="tw-text' + (opts.expanded ? "" : " clamp") + '">' + richText(t.text) + "</div>" +
+        (opts.expanded ? "" : '<button type="button" class="show-more" hidden>Show more</button>') +
+        mediaHtml(t.media) +
+        quoteHtml(t.quote, bm, opts.expanded) +
+        (opts.threadHint ? '<span class="thread-hint">Show this thread · ' + opts.threadHint + " posts</span>" : "") +
+        (opts.noActions ? "" : actions(t.stats, opts.url)) +
+      "</div></article>";
+  }
+
+  function allText(bm) {
+    var parts = [bm.author.name, bm.author.handle];
+    bm.tweets.forEach(function (t) {
+      parts.push(t.text);
+      if (t.quote) {
+        parts.push(t.quote.author.name, t.quote.author.handle, t.quote.text);
+        (t.quote.thread || []).forEach(function (p) { parts.push(p.text); });
+      }
     });
+    return parts.join("\n").toLowerCase();
+  }
 
-    $("gate").style.display = "none";
-    $("app").style.display = "block";
-    document.title = "Bookmarks";
+  /* ============================== views =============================== */
+  function setHeader(detail, bm) {
+    $("back").hidden = !detail;
+    $("search-row").hidden = !!detail;
+    $("title").textContent = detail ? "Post" : "Bookmarks";
+    $("subtitle").textContent = detail ? "" : "@cemozerr · " + S.data.bookmarks.length + " saved";
+    $("filter-pill-wrap").hidden = detail || !S.author;
+    if (S.author && !detail) {
+      var a = S.data.bookmarks.filter(function (b) { return b.author.handle === S.author; })[0];
+      $("filter-pill-text").textContent = "From @" + (a ? a.author.handle : S.author);
+    }
+    document.title = detail ? (bm.author.name + " on X: “" + bm.tweets[0].text.slice(0, 60).replace(/\s+/g, " ") + "…” · Bookmarks") : "Bookmarks";
+    renderPeople();
+  }
+
+  function renderList() {
+    setHeader(false);
+    var q = S.q.trim().toLowerCase();
+    var list = S.data.bookmarks.filter(function (b) {
+      if (S.author && b.author.handle !== S.author) return false;
+      if (q && allText(b).indexOf(q) === -1) return false;
+      return true;
+    });
+    var view = $("view");
+    if (!list.length) {
+      view.innerHTML = '<div class="empty"><h3>No results for “' + esc(S.q || "@" + S.author) + '”</h3><p>Try searching for something else, or clear the filter.</p></div>';
+      return;
+    }
+    view.innerHTML = list.map(function (b) {
+      var t = b.tweets[0];
+      return tweetRow(b.author, t, b, { slug: b.slug, threadHint: b.tweets.length > 1 ? b.tweets.length : 0, url: b.url });
+    }).join("") + '<div class="end">' + (q || S.author ? list.length + " of " + S.data.bookmarks.length + " bookmarks" : "You’ve reached the end of your bookmarks.") + "</div>";
+    afterRender(view, q);
+  }
+
+  function renderDetail(slug) {
+    var bm = S.data.bookmarks.filter(function (b) { return b.slug === slug; })[0];
+    if (!bm) { location.hash = ""; return; }
+    setHeader(true, bm);
+    var first = bm.tweets[0], rest = bm.tweets.slice(1);
+    var st = first.stats || {};
+    var chainDown = rest.length > 0;
+
+    var statBits = [];
+    if (st.reposts != null) statBits.push("<span><b>" + fmtFull(st.reposts) + "</b> Reposts</span>");
+    if (st.quotes != null) statBits.push("<span><b>" + fmtFull(st.quotes) + "</b> Quotes</span>");
+    if (st.likes != null) statBits.push("<span><b>" + fmtFull(st.likes) + "</b> Likes</span>");
+    if (st.bookmarks != null) statBits.push("<span><b>" + fmtFull(st.bookmarks) + "</b> Bookmarks</span>");
+
+    var html = '<article class="focal' + (chainDown ? " chain" : "") + '">' +
+      '<div class="focal-head">' + avatar(bm.author) +
+        '<div class="who"><a class="nm" href="' + profileUrl(bm.author) + '" target="_blank" rel="noopener noreferrer">' + esc(bm.author.name) + (bm.author.verified ? VBADGE : "") + "</a>" +
+        '<div class="hd">@' + esc(bm.author.handle) + "</div></div></div>" +
+      '<div class="tw-text">' + richText(first.text) + "</div>" +
+      mediaHtml(first.media) +
+      quoteHtml(first.quote, bm, true) +
+      '<div class="focal-meta"><a href="' + esc(bm.url) + '" target="_blank" rel="noopener noreferrer">' + esc(fullTime(first.time)) + "</a>" +
+        (st.views != null ? ' · <b>' + fmtNum(st.views) + "</b> Views" : "") + "</div>" +
+      (statBits.length ? '<div class="focal-stats">' + statBits.join("") + "</div>" : "") +
+      actions(st, bm.url) +
+      "</article>";
+
+    html += rest.map(function (t, i) {
+      return tweetRow(bm.author, t, bm, { static: true, chainUp: true, chainDown: i < rest.length - 1, expanded: true, url: bm.url });
+    }).join("");
+
+    if (bm.notes && bm.notes.length) {
+      html += '<div class="section-h">Notes<span class="sub">Added when saved — not part of the post</span></div>';
+      html += bm.notes.map(function (n, i) {
+        return '<details class="note"' + (i === 0 ? " open" : "") + '><summary>' + icon("note") + "<span>" + esc(n.label || "Note") + '</span><span class="chev">' + icon("chev") + "</span></summary>" +
+          '<div class="note-body">' + n.html + "</div></details>";
+      }).join("");
+    }
+
+    if (bm.replies && bm.replies.length) {
+      html += '<div class="section-h">Replies<span class="sub">A few worth keeping</span></div>';
+      html += bm.replies.map(function (r) {
+        return tweetRow(r.author, r, bm, { static: true, expanded: true, replyTo: bm.author });
+      }).join("");
+    }
+
+    html += '<div class="capture"><a href="' + esc(bm.url) + '" target="_blank" rel="noopener noreferrer">View on X ' + icon("out") + "</a>" +
+      (bm.capture ? "<div>" + esc(bm.capture) + "</div>" : "") + "</div>";
+
+    var view = $("view");
+    view.innerHTML = html;
+    afterRender(view, "");
     window.scrollTo(0, 0);
   }
 
+  function afterRender(root, q) {
+    // reveal "Show more" only where the clamp actually cut text
+    requestAnimationFrame(function () {
+      root.querySelectorAll(".tw-text.clamp").forEach(function (el) {
+        var btn = el.nextElementSibling;
+        if (btn && btn.classList.contains("show-more") && el.scrollHeight > el.clientHeight + 2) btn.hidden = false;
+      });
+    });
+    if (q) highlight(root, q);
+  }
+
+  function highlight(root, q) {
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var nodes = [], n;
+    while ((n = walker.nextNode())) {
+      if (n.nodeValue.toLowerCase().indexOf(q) !== -1 && n.parentNode.closest(".tw-text, .tw-head")) nodes.push(n);
+    }
+    nodes.forEach(function (node) {
+      var text = node.nodeValue, lower = text.toLowerCase(), frag = document.createDocumentFragment(), i = 0, j;
+      while ((j = lower.indexOf(q, i)) !== -1) {
+        frag.appendChild(document.createTextNode(text.slice(i, j)));
+        var m = document.createElement("mark");
+        m.textContent = text.slice(j, j + q.length);
+        frag.appendChild(m);
+        i = j + q.length;
+      }
+      frag.appendChild(document.createTextNode(text.slice(i)));
+      node.parentNode.replaceChild(frag, node);
+    });
+  }
+
+  function renderPeople() {
+    var by = {};
+    S.data.bookmarks.forEach(function (b) {
+      var k = b.author.handle;
+      if (!by[k]) by[k] = { a: b.author, n: 0, last: b.saved };
+      by[k].n++;
+    });
+    $("people").innerHTML = Object.keys(by).map(function (k) {
+      var p = by[k];
+      return '<button type="button" class="person' + (S.author === k ? " on" : "") + '" data-author="' + esc(k) + '">' + avatar(p.a) +
+        '<span class="who"><span class="nm"><span>' + esc(p.a.name) + "</span>" + (p.a.verified ? VBADGE : "") + "</span>" +
+        '<span class="hd">@' + esc(p.a.handle) + "</span></span>" +
+        (p.n > 1 ? '<span class="count">' + p.n + "</span>" : "") + "</button>";
+    }).join("");
+  }
+
+  function route() {
+    var m = /^#\/(.+)$/.exec(location.hash);
+    if (m) renderDetail(decodeURIComponent(m[1]));
+    else { renderList(); window.scrollTo(0, S.scrollY || 0); }
+  }
+
+  /* ============================== events ============================== */
+  function toast(msg) {
+    var t = document.createElement("div");
+    t.className = "toast"; t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { t.remove(); }, 1800);
+  }
+
+  function onClick(e) {
+    var el = e.target;
+    var copy = el.closest("[data-copy]");
+    if (copy) {
+      e.stopPropagation();
+      var url = copy.getAttribute("data-copy");
+      (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(
+        function () { toast("Copied link to post"); },
+        function () { window.open(url, "_blank", "noopener"); }
+      );
+      return;
+    }
+    var more = el.closest(".show-more");
+    if (more) {
+      var txt = more.previousElementSibling;
+      txt.classList.remove("clamp");
+      more.hidden = true;
+      return;
+    }
+    var img = el.closest("img[data-zoom]");
+    if (img) {
+      var lb = $("lightbox");
+      lb.querySelector("img").src = img.src;
+      lb.hidden = false;
+      return;
+    }
+    if (el.closest("a, button, video, summary, input, label")) return;
+    var row = el.closest(".tw[data-slug]");
+    if (row && !(window.getSelection && String(window.getSelection()).length)) {
+      S.scrollY = window.scrollY;
+      S.fromList = true;
+      location.hash = "#/" + encodeURIComponent(row.getAttribute("data-slug"));
+    }
+  }
+
+  function render(payload) {
+    if (!payload || payload.version !== 2) throw new Error("vault format not supported");
+    S.data = payload;
+    var me = { name: "Cem Ozer", handle: "cemozerr" };
+    $("rail-me").innerHTML = '<img class="av" src="/portrait-160.jpg" alt="" onerror="this.style.visibility=\'hidden\'">' + '<div class="who"><div style="font-weight:700">' + esc(me.name) + '</div><div style="color:var(--muted)">' + payload.bookmarks.length + " bookmarks</div></div>";
+    $("gate").hidden = true;
+    $("app").hidden = false;
+    route();
+  }
+
   function lock() {
-    state.posts = [];
-    if (state.observer) state.observer.disconnect();
-    $("feed").textContent = "";
-    $("chips").textContent = "";
-    $("pw").value = "";
-    $("err").textContent = "";
-    $("app").style.display = "none";
-    $("gate").style.display = "grid";
-    document.title = "Bookmarks — locked";
+    Object.keys(S.blobs).forEach(function (k) { URL.revokeObjectURL(S.blobs[k]); });
+    S.data = null; S.blobs = {}; S.fromList = false; S.q = ""; S.author = ""; S.scrollY = 0;
+    $("view").textContent = ""; $("people").textContent = ""; $("rail-me").textContent = "";
+    $("q").value = ""; $("pw").value = ""; $("err").textContent = "";
+    $("app").hidden = true; $("gate").hidden = false;
+    history.replaceState(null, "", location.pathname);
+    document.title = "Bookmarks";
     $("pw").focus();
   }
 
   var busy = false;
-  async function submit() {
+  async function submit(e) {
+    if (e) e.preventDefault();
     if (busy) return;
     var pw = $("pw").value;
     if (!pw) return;
     busy = true;
-    $("go").disabled = true;
-    $("go").textContent = "Decrypting…";
-    $("err").textContent = "";
+    $("go").disabled = true; $("go").textContent = "Decrypting…"; $("err").textContent = "";
     try {
       render(await unlock(pw));
-    } catch (e) {
-      $("err").textContent = e.message === "wrong password"
-        ? "Wrong password."
-        : "Could not unlock: " + e.message;
+    } catch (err) {
+      $("err").textContent = err.message === "wrong password" ? "Wrong password." : "Could not unlock: " + err.message;
       $("pw").select();
     } finally {
-      busy = false;
-      $("go").disabled = false;
-      $("go").textContent = "Unlock";
+      busy = false; $("go").disabled = false; $("go").textContent = "Unlock";
     }
   }
 
-  // Preview hook (used by the local layout harness only; inert in production)
-  if (window.PLAIN_PAYLOAD) render(window.PLAIN_PAYLOAD);
+  $("gate-form").addEventListener("submit", submit);
+  document.querySelectorAll("[data-lock]").forEach(function (b) { b.addEventListener("click", lock); });
+  $("view").addEventListener("click", onClick);
+  $("people").addEventListener("click", function (e) {
+    var p = e.target.closest("[data-author]");
+    if (!p) return;
+    var h = p.getAttribute("data-author");
+    S.author = S.author === h ? "" : h;
+    S.scrollY = 0;
+    if (location.hash) location.hash = ""; else route();
+  });
+  $("filter-clear").addEventListener("click", function () { S.author = ""; route(); });
+  $("back").addEventListener("click", function () {
+    if (S.fromList) { S.fromList = false; history.back(); }
+    else location.hash = "";
+  });
+  $("nav-bm").addEventListener("click", function (e) { e.preventDefault(); S.author = ""; S.scrollY = 0; if (location.hash) location.hash = ""; else route(); });
+  var qTimer;
+  $("q").addEventListener("input", function () {
+    $("q-clear").hidden = !this.value;
+    clearTimeout(qTimer);
+    var v = this.value;
+    qTimer = setTimeout(function () { S.q = v; S.scrollY = 0; renderList(); }, 120);
+  });
+  $("q-clear").addEventListener("click", function (e) { e.preventDefault(); $("q").value = ""; this.hidden = true; S.q = ""; renderList(); $("q").focus(); });
+  $("lightbox").addEventListener("click", function () { this.hidden = true; });
+  window.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      if (!$("lightbox").hidden) $("lightbox").hidden = true;
+      else if (/^#\//.test(location.hash)) location.hash = "";
+    }
+    if (e.key === "/" && !$("app").hidden && document.activeElement.tagName !== "INPUT" && !location.hash) { e.preventDefault(); $("q").focus(); }
+  });
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  window.addEventListener("hashchange", function () { if (S.data) route(); });
 
-  window.addEventListener("scroll", function () {
-    $("totop").style.display = window.scrollY > 900 ? "grid" : "none";
-  }, { passive: true });
-  $("totop").addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
-  $("go").addEventListener("click", submit);
-  $("pw").addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
-  $("lock").addEventListener("click", lock);
+  // Preview hook for the local layout harness; inert in production.
+  if (window.PLAIN_PAYLOAD) render(window.PLAIN_PAYLOAD);
 })();
 </script>
 </body>
