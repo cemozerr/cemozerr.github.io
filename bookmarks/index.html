@@ -16,6 +16,7 @@
     --accent: #1d6fd0;
     --accent-fg: #ffffff;
     --err: #c0392b;
+    --col: 600px;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -30,9 +31,9 @@
     }
   }
   * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
   body {
     margin: 0;
-    min-height: 100vh;
     background: var(--bg);
     color: var(--fg);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -42,12 +43,7 @@
   a { color: var(--accent); }
 
   /* ---------- gate ---------- */
-  #gate {
-    min-height: 100vh;
-    display: grid;
-    place-items: center;
-    padding: 1.5rem;
-  }
+  #gate { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; }
   .gate-box { width: 100%; max-width: 22rem; }
   .gate-box h1 { font-size: 1.15rem; margin: 0 0 .35rem; letter-spacing: -.01em; }
   .gate-box p { color: var(--muted); font-size: .86rem; margin: 0 0 1.4rem; }
@@ -70,38 +66,59 @@
 
   /* ---------- app ---------- */
   #app { display: none; }
+
   header.bar {
-    position: sticky; top: 0; z-index: 5;
+    position: sticky; top: 0; z-index: 20;
     display: flex; align-items: center; gap: .8rem;
-    padding: .75rem 1.1rem;
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
-    backdrop-filter: blur(10px);
+    padding: .7rem 1rem;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(12px) saturate(1.2);
     border-bottom: 1px solid var(--rule);
   }
-  header.bar .name { font-weight: 700; font-size: .95rem; letter-spacing: -.01em; }
-  header.bar .count { color: var(--muted); font-size: .8rem; }
+  header.bar .name { font-weight: 700; font-size: .97rem; letter-spacing: -.01em; }
+  header.bar .count { color: var(--muted); font-size: .78rem; }
   header.bar .spacer { flex: 1; }
-  header.bar button { padding: .4rem .75rem; font-size: .82rem; }
+  header.bar button { padding: .35rem .7rem; font-size: .8rem; }
 
-  main { max-width: 46rem; margin: 0 auto; padding: 1.5rem 1.1rem 4rem; }
-  .list { display: grid; gap: .7rem; }
-  .card {
-    display: block; width: 100%; text-align: left;
-    background: var(--card); border: 1px solid var(--rule); border-radius: 12px;
-    padding: .95rem 1rem; cursor: pointer; color: inherit; font: inherit;
-    transition: border-color .12s ease;
+  /* horizontal chips */
+  .chips {
+    position: sticky; top: 51px; z-index: 19;
+    display: flex; gap: .45rem; overflow-x: auto; scrollbar-width: none;
+    padding: .55rem 1rem; border-bottom: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(12px) saturate(1.2);
   }
-  .card:hover { border-color: var(--accent); }
-  .card .kicker { font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
-  .card .t { font-weight: 650; margin: .25rem 0 .3rem; line-height: 1.35; }
-  .card .b { color: var(--muted); font-size: .87rem; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto; white-space: nowrap; cursor: pointer;
+    font-size: .78rem; font-weight: 600; color: var(--muted);
+    background: var(--card); border: 1px solid var(--rule);
+    border-radius: 999px; padding: .3rem .7rem;
+  }
+  .chip:hover { color: var(--fg); border-color: var(--accent); }
+  .chip .h { color: var(--accent); margin-right: .3rem; }
 
-  /* ---------- reader ---------- */
-  #reader { display: none; }
-  #reader .bar { position: sticky; top: 0; z-index: 5; }
-  #frame { display: block; width: 100%; border: 0; background: var(--bg); height: calc(100vh - 53px); }
-  .hint { color: var(--muted); font-size: .8rem; margin-top: 2rem; }
-  .warn { color: var(--muted); font-size: .8rem; margin-top: .75rem; }
+  /* feed */
+  main { max-width: var(--col); margin: 0 auto; }
+  .item { border-bottom: 1px solid var(--rule); position: relative; }
+  .item iframe {
+    display: block; width: 100%; height: 320px; border: 0;
+    background: var(--bg); overflow: hidden;
+  }
+  .item.pending iframe { opacity: .35; }
+  .item .placeholder {
+    display: none; padding: 2rem 1rem; color: var(--muted); font-size: .85rem; text-align: center;
+  }
+
+  #totop {
+    position: fixed; right: 1rem; bottom: 1rem; z-index: 30;
+    width: 2.6rem; height: 2.6rem; border-radius: 999px; padding: 0;
+    display: none; place-items: center; font-size: 1rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  }
+
+  .foot { max-width: var(--col); margin: 0 auto; padding: 1.75rem 1rem 4rem; color: var(--muted); font-size: .8rem; }
+  @media print { .chips, #totop, header.bar { display: none !important; } }
 </style>
 </head>
 <body>
@@ -118,30 +135,24 @@
 </div>
 
 <div id="app">
-  <header class="bar" id="listbar">
+  <header class="bar">
     <div>
-      <div class="name">Bookmarked tweets</div>
+      <div class="name">Bookmarks</div>
       <div class="count" id="count"></div>
     </div>
     <div class="spacer"></div>
-    <button class="secondary" id="lock1">Lock</button>
+    <button class="secondary" id="lock">Lock</button>
   </header>
 
-  <header class="bar" id="readbar" style="display:none">
-    <button class="secondary" id="back">&larr; All</button>
-    <div class="name" id="readtitle"></div>
-    <div class="spacer"></div>
-    <button class="secondary" id="lock2">Lock</button>
-  </header>
+  <nav class="chips" id="chips" aria-label="Jump to post"></nav>
 
-  <main id="listview">
-    <div class="list" id="list"></div>
-    <div class="hint">Everything here — text, images, video — is inside the encrypted vault. Nothing is readable without the password, including from the page source.</div>
-  </main>
+  <main id="feed"></main>
 
-  <div id="reader">
-    <iframe id="frame" title="Saved post"></iframe>
+  <div class="foot">
+    Everything on this page — text, images, video — is inside one encrypted vault. Nothing is readable without the password, including from the page source.
   </div>
+
+  <button id="totop" class="secondary" aria-label="Back to top">&uarr;</button>
 </div>
 
 <script src="vault.js"></script>
@@ -150,12 +161,12 @@
   "use strict";
 
   var $ = function (id) { return document.getElementById(id); };
-  var state = { posts: [], index: null, key: null };
+  var state = { posts: [], observer: null };
 
   if (!window.crypto || !window.crypto.subtle) {
     document.addEventListener("DOMContentLoaded", function () {
       var e = document.getElementById("err");
-      if (e) e.textContent = "WebCrypto unavailable. Open this over https:// or localhost (file:// works in Chrome/Safari), not plain http on a LAN address.";
+      if (e) e.textContent = "WebCrypto unavailable. Open this over https:// or localhost, not plain http on a LAN address.";
     });
   }
 
@@ -186,66 +197,100 @@
     return JSON.parse(new TextDecoder().decode(plain));
   }
 
+  // Fit an iframe to its content height, re-fitting as media arrives.
+  function fit(frame) {
+    try {
+      var d = frame.contentDocument;
+      if (!d) return;
+      var h = Math.max(
+        d.documentElement ? d.documentElement.scrollHeight : 0,
+        d.body ? d.body.scrollHeight : 0
+      );
+      if (h > 100 && Math.abs(h - parseInt(frame.style.height, 10)) > 2) {
+        frame.style.height = h + "px";
+      }
+    } catch (e) { /* cross-origin guard */ }
+  }
+
+  function mount(card, post) {
+    if (card.dataset.mounted) return;
+    card.dataset.mounted = "1";
+    card.classList.remove("pending");
+    var frame = card.querySelector("iframe");
+    frame.addEventListener("load", function () {
+      fit(frame);
+      setTimeout(function () { fit(frame); }, 120);
+      setTimeout(function () { fit(frame); }, 600);
+      setTimeout(function () { fit(frame); }, 1600);
+      try {
+        var d = frame.contentDocument;
+        if (!d) return;
+        d.querySelectorAll("img, video").forEach(function (el) {
+          el.addEventListener("load", function () { fit(frame); });
+          el.addEventListener("loadedmetadata", function () { fit(frame); });
+        });
+        if (window.ResizeObserver) {
+          var ro = new ResizeObserver(function () { fit(frame); });
+          ro.observe(d.documentElement);
+        }
+      } catch (e) { /* ignore */ }
+    });
+    frame.srcdoc = post.html;
+  }
+
   function render(payload) {
     state.posts = payload.posts || [];
-    var list = $("list");
-    list.textContent = "";
+    var feed = $("feed"), chips = $("chips");
+    feed.textContent = ""; chips.textContent = "";
     $("count").textContent = state.posts.length + " saved";
 
+    state.observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) mount(e.target, state.posts[+e.target.dataset.i]);
+      });
+    }, { rootMargin: "1200px 0px 1200px 0px" });
+
     state.posts.forEach(function (p, i) {
-      var el = document.createElement("button");
-      el.className = "card";
-      el.type = "button";
-      var kicker = document.createElement("div");
-      kicker.className = "kicker";
-      kicker.textContent = p.handle + "  ·  " + p.date;
-      var t = document.createElement("div");
-      t.className = "t";
-      t.textContent = p.title;
-      var b = document.createElement("div");
-      b.className = "b";
-      b.textContent = p.blurb || "";
-      el.appendChild(kicker); el.appendChild(t); el.appendChild(b);
-      el.addEventListener("click", function () { open(i); });
-      list.appendChild(el);
+      var card = document.createElement("section");
+      card.className = "item pending";
+      card.dataset.i = i;
+      card.id = "p" + i;
+
+      var frame = document.createElement("iframe");
+      frame.title = p.title;
+      frame.setAttribute("scrolling", "no");
+      frame.loading = "lazy";
+      card.appendChild(frame);
+      feed.appendChild(card);
+      state.observer.observe(card);
+
+      var chip = document.createElement("button");
+      chip.className = "chip";
+      chip.type = "button";
+      var h = document.createElement("span");
+      h.className = "h"; h.textContent = p.handle;
+      chip.appendChild(h);
+      chip.appendChild(document.createTextNode(p.title.length > 42 ? p.title.slice(0, 40) + "…" : p.title));
+      chip.addEventListener("click", function () {
+        mount(card, p);
+        card.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      chips.appendChild(chip);
     });
 
     $("gate").style.display = "none";
     $("app").style.display = "block";
     document.title = "Bookmarks";
-  }
-
-  function open(i) {
-    var p = state.posts[i];
-    if (!p) return;
-    state.index = i;
-    $("readtitle").textContent = p.title;
-    $("listview").style.display = "none";
-    $("listbar").style.display = "none";
-    $("readbar").style.display = "flex";
-    $("reader").style.display = "block";
-    var f = $("frame");
-    f.srcdoc = p.html;
     window.scrollTo(0, 0);
   }
 
-  function close() {
-    state.index = null;
-    $("frame").srcdoc = "<!DOCTYPE html><title></title>";
-    $("reader").style.display = "none";
-    $("readbar").style.display = "none";
-    $("listbar").style.display = "flex";
-    $("listview").style.display = "block";
-  }
-
   function lock() {
-    state.key = null;
     state.posts = [];
-    $("list").textContent = "";
-    $("frame").srcdoc = "<!DOCTYPE html><title></title>";
+    if (state.observer) state.observer.disconnect();
+    $("feed").textContent = "";
+    $("chips").textContent = "";
     $("pw").value = "";
     $("err").textContent = "";
-    close();
     $("app").style.display = "none";
     $("gate").style.display = "grid";
     document.title = "Bookmarks — locked";
@@ -262,8 +307,7 @@
     $("go").textContent = "Decrypting…";
     $("err").textContent = "";
     try {
-      var payload = await unlock(pw);
-      render(payload);
+      render(await unlock(pw));
     } catch (e) {
       $("err").textContent = e.message === "wrong password"
         ? "Wrong password."
@@ -276,11 +320,13 @@
     }
   }
 
+  window.addEventListener("scroll", function () {
+    $("totop").style.display = window.scrollY > 900 ? "grid" : "none";
+  }, { passive: true });
+  $("totop").addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
   $("go").addEventListener("click", submit);
   $("pw").addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
-  $("lock1").addEventListener("click", lock);
-  $("lock2").addEventListener("click", lock);
-  $("back").addEventListener("click", close);
+  $("lock").addEventListener("click", lock);
 })();
 </script>
 </body>
