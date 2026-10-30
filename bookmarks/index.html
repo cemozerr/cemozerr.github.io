@@ -231,7 +231,8 @@
   .quote .tw-text.clamp { -webkit-line-clamp: 6; }
   .quote .media { margin: 12px 0 0; border-radius: 0; border: 0; border-top: 1px solid var(--line); }
   .quote .quote-body + .media { margin-top: 0; }
-  .quote-thread-link { display: block; color: var(--blue); margin-top: 8px; font-size: 15px; }
+  .quote .media.n1 img { max-height: 290px; object-position: top; }
+  .quote-thread-link { display: block; text-align: left; color: var(--blue); margin-top: 8px; font-size: 15px; }
   .quote-thread { border-top: 1px solid var(--line); }
   .quote-thread .tw { padding-left: 12px; padding-right: 12px; cursor: default; }
   .quote-thread .tw:hover { background: transparent; }
@@ -566,18 +567,27 @@
       "</span></div>";
   }
 
-  function quoteHtml(q, bm, expanded) {
+  // cut long text the way the timeline does: ~280 chars, at a word boundary
+  function truncate(text, n) {
+    if (!text || text.length <= n) return { text: text || "", cut: false };
+    var t = text.slice(0, n), sp = t.search(/\s\S*$/);
+    if (sp > n * 0.6) t = t.slice(0, sp);
+    return { text: t.replace(/[\s.,;:]+$/, "") + "…", cut: true };
+  }
+
+  // mode: "timeline" (short card), "detail" (full text; quoted thread behind a toggle)
+  function quoteHtml(q, bm, mode) {
     if (!q) return "";
     var t = q.thread || [];
-    var link = q.url || bm.url;
-    var html = '<div class="quote" data-href="' + esc(link) + '"><div class="quote-body">' +
+    var body = mode === "detail" ? q.text : truncate(q.text, 200).text;
+    var html = '<div class="quote"><div class="quote-body">' +
       head(q.author, q.time, { smallAvatar: true }) +
-      '<div class="tw-text' + (expanded ? "" : " clamp") + '">' + richText(q.text) + "</div>";
-    if (t.length && !expanded) html += '<span class="quote-thread-link">Show this thread · ' + (t.length + 1) + " posts</span>";
+      '<div class="tw-text">' + richText(body) + "</div>";
+    if (t.length && mode === "detail") html += '<button type="button" class="quote-thread-link" data-expand-quote>Show this thread · ' + (t.length + 1) + " posts</button>";
     html += "</div>" + mediaHtml(q.media);
-    if (t.length && expanded) {
-      html += '<div class="quote-thread">' + t.map(function (p, i) {
-        return tweetRow(q.author, p, bm, { static: true, chainUp: true, chainDown: i < t.length - 1, expanded: true, noActions: false });
+    if (t.length && mode === "detail") {
+      html += '<div class="quote-thread" hidden>' + t.map(function (p, i) {
+        return tweetRow(q.author, p, bm, { static: true, chainUp: true, chainDown: i < t.length - 1, expanded: true, noActions: true });
       }).join("") + "</div>";
     }
     return html + "</div>";
@@ -592,10 +602,13 @@
       '<div class="tw-main">' +
         head(author, t.time) +
         (opts.replyTo ? '<div class="reply-ctx">Replying to <a href="' + profileUrl(opts.replyTo) + '" target="_blank" rel="noopener noreferrer">@' + esc(opts.replyTo.handle) + "</a></div>" : "") +
-        '<div class="tw-text' + (opts.expanded ? "" : " clamp") + '">' + richText(t.text) + "</div>" +
-        (opts.expanded ? "" : '<button type="button" class="show-more" hidden>Show more</button>') +
+        (function () {
+          var tr = opts.expanded ? { text: t.text, cut: false } : truncate(t.text, 280);
+          return '<div class="tw-text">' + richText(tr.text) + "</div>" +
+            (tr.cut ? '<button type="button" class="show-more">Show more</button>' : "");
+        })() +
         mediaHtml(t.media) +
-        quoteHtml(t.quote, bm, opts.expanded) +
+        quoteHtml(t.quote, bm, opts.expanded ? "detail" : "timeline") +
         (opts.threadHint ? '<span class="thread-hint">Show this thread · ' + opts.threadHint + " posts</span>" : "") +
         (opts.noActions ? "" : actions(t.stats, opts.url)) +
       "</div></article>";
@@ -668,7 +681,7 @@
         '<div class="hd">@' + esc(bm.author.handle) + "</div></div></div>" +
       '<div class="tw-text">' + richText(first.text) + "</div>" +
       mediaHtml(first.media) +
-      quoteHtml(first.quote, bm, true) +
+      quoteHtml(first.quote, bm, "detail") +
       '<div class="focal-meta"><a href="' + esc(bm.url) + '" target="_blank" rel="noopener noreferrer">' + esc(fullTime(first.time)) + "</a>" +
         (st.views != null ? ' · <b>' + fmtNum(st.views) + "</b> Views" : "") + "</div>" +
       (statBits.length ? '<div class="focal-stats">' + statBits.join("") + "</div>" : "") +
@@ -682,7 +695,7 @@
     if (bm.notes && bm.notes.length) {
       html += '<div class="section-h">Notes<span class="sub">Added when saved — not part of the post</span></div>';
       html += bm.notes.map(function (n, i) {
-        return '<details class="note"' + (i === 0 ? " open" : "") + '><summary>' + icon("note") + "<span>" + esc(n.label || "Note") + '</span><span class="chev">' + icon("chev") + "</span></summary>" +
+        return '<details class="note"' + "" + '><summary>' + icon("note") + "<span>" + esc(n.label || "Note") + '</span><span class="chev">' + icon("chev") + "</span></summary>" +
           '<div class="note-body">' + n.html + "</div></details>";
       }).join("");
     }
@@ -704,13 +717,6 @@
   }
 
   function afterRender(root, q) {
-    // reveal "Show more" only where the clamp actually cut text
-    requestAnimationFrame(function () {
-      root.querySelectorAll(".tw-text.clamp").forEach(function (el) {
-        var btn = el.nextElementSibling;
-        if (btn && btn.classList.contains("show-more") && el.scrollHeight > el.clientHeight + 2) btn.hidden = false;
-      });
-    });
     if (q) highlight(root, q);
   }
 
@@ -776,11 +782,18 @@
       );
       return;
     }
+    var qx = el.closest("[data-expand-quote]");
+    if (qx) {
+      var th = qx.closest(".quote").querySelector(".quote-thread");
+      th.hidden = !th.hidden;
+      qx.textContent = th.hidden ? qx.textContent.replace(/^Hide/, "Show") : qx.textContent.replace(/^Show/, "Hide");
+      return;
+    }
     var more = el.closest(".show-more");
-    if (more) {
-      var txt = more.previousElementSibling;
-      txt.classList.remove("clamp");
-      more.hidden = true;
+    if (more && more.closest(".tw[data-slug]")) {
+      var r = more.closest(".tw[data-slug]");
+      S.scrollY = window.scrollY; S.fromList = true;
+      location.hash = "#/" + encodeURIComponent(r.getAttribute("data-slug"));
       return;
     }
     var img = el.closest("img[data-zoom]");
